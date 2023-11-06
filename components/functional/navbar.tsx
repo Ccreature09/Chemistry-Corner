@@ -10,7 +10,6 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { Separator } from "@/components/ui/separator";
 
 import { cn } from "@/lib/utils";
 export const Navbar = () => {
@@ -18,9 +17,11 @@ export const Navbar = () => {
     <>
       <div className="p-4 flex flex-col md:flex-row justify-between bg-green-500 items-center">
         <div className="mx-auto">
-          <h1 className="text-center font-bold text-6xl text-white">
-            Chemistry Corner
-          </h1>
+          <Link href={"/"}>
+            <h1 className="text-center font-bold text-6xl text-white">
+              Chemistry Corner
+            </h1>
+          </Link>
         </div>
       </div>
 
