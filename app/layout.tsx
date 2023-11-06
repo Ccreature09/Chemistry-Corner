@@ -8,7 +8,6 @@ export const metadata: Metadata = {
   title: "Prodanova's Chemistry Corner",
   description: "Chemistry Learning App",
   manifest: "/manifest.webmanifest",
-  themeColor: "#008bf4",
 };
 
 export default function RootLayout({
