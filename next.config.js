@@ -1,4 +1,15 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {}
+const prod = process.env.NODE_ENV === "production";
+const withPWA = require("next-pwa")({
+  dest: "public",
+  register: true,
+  disable: prod ? false : true,
+  skipWaiting: true,
+});
 
-module.exports = nextConfig
+module.exports = withPWA({
+  reactStrictMode: true,
+  images: {
+    domains: ["cdn.discordapp.com", "lh3.googleusercontent.com", "i.ibb.co"],
+  },
+});
