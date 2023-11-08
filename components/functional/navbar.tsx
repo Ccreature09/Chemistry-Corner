@@ -1,5 +1,6 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   NavigationMenu,
@@ -10,9 +11,63 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import UserForm from "./signIn";
+
+import {
+  signInWithPopup,
+  User,
+  GoogleAuthProvider,
+  signOut,
+  onAuthStateChanged,
+} from "firebase/auth";
+
+import { Button } from "../ui/button";
 
 import { cn } from "@/lib/utils";
+import { auth } from "@/firebase/firebase";
+import { Separator } from "../ui/separator";
+import { Badge } from "../ui/badge";
+
+const provider = new GoogleAuthProvider();
+const adminArray = ["KSca1U09jwMSIK0qYedXZDhe7d02"];
+
 export const Navbar = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+
+        setProfileImageUrl(user.photoURL);
+      } else {
+        setUser(null);
+        setProfileImageUrl(null);
+      }
+    });
+  }, []);
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      setUser(result.user);
+    } catch (error) {
+      console.error("Google sign-in failed:", error);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+
+      setUser(null);
+    } catch (error) {
+      console.error("Sign-out failed:", error);
+    }
+  };
+
   return (
     <>
       <div className="p-4 flex flex-col md:flex-row justify-between bg-green-500 items-center">
@@ -26,6 +81,78 @@ export const Navbar = () => {
       </div>
 
       <div className="w-full my-auto flex justify-center bg-green-800 h-14">
+        <Popover>
+          <PopoverTrigger className="">
+            {!user ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-10 h-10 mx-3 "
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+            ) : user && profileImageUrl ? (
+              profileImageUrl && (
+                <div className=" flex flex-col justify-center">
+                  <Image
+                    src={profileImageUrl}
+                    alt="User Profile"
+                    width={40}
+                    height={40}
+                    className=" rounded-full mx-auto"
+                  />
+                  {adminArray.includes(user.uid) && <Badge>Admin</Badge>}
+                </div>
+              )
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-10 h-10 "
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+            )}
+          </PopoverTrigger>
+          <PopoverContent>
+            {user && adminArray.includes(user.uid) && (
+              <Link href={"/admin"}>
+                <Button className="w-full">Admin Dashboard</Button>
+              </Link>
+            )}
+            {!user ? (
+              <>
+                <h1 className=" text-center mb-8 font-bold text-2xl">
+                  Вход / Регистрация
+                </h1>
+                <Button className="w-full mb-5" onClick={handleGoogleSignIn}>
+                  Вход с Google
+                </Button>
+                <UserForm login />
+                <Separator className="mb-5" />
+                <UserForm login={false} />
+              </>
+            ) : (
+              <Button className="w-full mt-4" onClick={handleSignOut}>
+                Изход
+              </Button>
+            )}
+          </PopoverContent>
+        </Popover>
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
@@ -101,18 +228,36 @@ export const Navbar = () => {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <Link href="/blog" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Блог
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link href="/comics" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Комикси
-                </NavigationMenuLink>
-              </Link>
+              <NavigationMenuTrigger>Други неща</NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                  <li className="row-span-3">
+                    <NavigationMenuLink asChild>
+                      <a
+                        className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                        href="/"
+                      >
+                        <div className="mb-2 mt-4 text-lg font-medium">
+                          shadcn/ui
+                        </div>
+                        <p className="text-sm leading-tight text-muted-foreground">
+                          Beautifully designed components built with Radix UI
+                          and Tailwind CSS.
+                        </p>
+                      </a>
+                    </NavigationMenuLink>
+                  </li>
+                  <ListItem href="/blog" title="Блог">
+                    Re-usable components built using Radix UI and Tailwind CSS.
+                  </ListItem>
+                  <ListItem href="/comics" title="Комикси">
+                    How to install dependencies and structure your app.
+                  </ListItem>
+                  <ListItem href="/useful-info" title="Полезна информация">
+                    Styles for headings, paragraphs, lists...etc
+                  </ListItem>
+                </ul>
+              </NavigationMenuContent>
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
