@@ -9,11 +9,11 @@ import {
   query,
   serverTimestamp,
 } from "firebase/firestore";
-import { onAuthStateChanged, User } from "firebase/auth"; // Import 'Auth' from firebase/auth
+import { onAuthStateChanged, User } from "firebase/auth";
 import { auth, db } from "@/firebase/firebase";
 import { Navbar } from "@/components/functional/navbar";
 import { Footer } from "@/components/functional/footer";
-
+import BlogForm from "@/components/functional/blogform";
 interface Article {
   id: string;
   author: string;
@@ -24,8 +24,7 @@ interface Article {
 
 export default function Page() {
   const [user, setUser] = useState<User | null>(null);
-  const [articles, setArticles] = useState<Article[]>([]); // Specify the type for 'articles'
-  const [newArticle, setNewArticle] = useState<string>(""); // Specify the type for 'newArticle'
+  const [articles, setArticles] = useState<Article[]>([]);
 
   useEffect(() => {
     onAuthStateChanged(auth, (user: User | null) => {
@@ -60,65 +59,30 @@ export default function Page() {
       unsubscribe();
     };
   }, []);
-
-  const handleArticleSubmit = () => {
-    if (user) {
-      const articlesRef = collection(db, "articles");
-      addDoc(articlesRef, {
-        author: user.displayName,
-        content: newArticle,
-        status: "pending",
-        createdAt: serverTimestamp(),
-      })
-        .then(() => {
-          setNewArticle("");
-        })
-        .catch((error) => {
-          console.error("Error adding document: ", error);
-        });
-    }
+  const formatDate = (timestamp: Timestamp) => {
+    const date = new Date(timestamp.seconds * 1000);
+    return date.toLocaleString();
   };
-
   return (
     <>
-      {" "}
       <Navbar />
-      <div className="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4">
-        <div className="max-w-3xl bg-white p-6 rounded-lg shadow-md w-full">
-          {user ? (
-            <div>
-              <p className="text-2xl font-semibold">
-                Welcome, {user.displayName}
-              </p>
-              <textarea
-                className="w-full h-32 border rounded-lg p-2 my-2"
-                value={newArticle}
-                onChange={(e) => setNewArticle(e.target.value)}
-                placeholder="Write your article here..."
-              />
-              <button
-                onClick={handleArticleSubmit}
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-              >
-                Submit Article
-              </button>
-            </div>
-          ) : (
-            <p className="text-lg font-semibold">
-              Please sign in to submit articles.
-            </p>
-          )}
+      <div className="bg-gray-100 min-h-screen p-4">
+        <div className="max-w-lg mx-auto">
+          <BlogForm />
 
-          <div className="mt-8">
-            <h2 className="text-2xl font-semibold">Approved Articles</h2>
-            <ul>
-              {articles.map((article, index) => (
-                <li key={index} className="border-b border-gray-200 py-2">
-                  {article.content}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <h2 className="text-2xl font-semibold mt-6">All Articles</h2>
+          {articles.map((article, index) => (
+            <div
+              key={index}
+              className="border border-gray-300 rounded p-4 my-4"
+            >
+              <p className="text-lg font-semibold">{article.author}</p>
+              <p className="text-gray-600 text-sm">
+                {formatDate(article.createdAt)}
+              </p>
+              <p className="text-lg mt-2">{article.content}</p>
+            </div>
+          ))}
         </div>
       </div>
       <Footer />
