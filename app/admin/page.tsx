@@ -14,7 +14,10 @@ export default function AdminDashboard() {
   const router = useRouter();
 
   const [isAdmin, setIsAdmin] = useState(false);
-  const adminArray = ["KSca1U09jwMSIK0qYedXZDhe7d02"];
+  const adminArray = [
+    "KSca1U09jwMSIK0qYedXZDhe7d02",
+    "6ok0udZR89QleRS7nlDC8jcNHFs2",
+  ];
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -34,20 +37,54 @@ export default function AdminDashboard() {
       <div className="max-w-3xl mx-auto p-4">
         {isAdmin && (
           <div className="container mx-auto p-4">
-            <Tabs defaultValue="products" className="">
+            <Tabs defaultValue="Blog Moderation" className="">
               <TabsList className="w-full mb-5">
                 <TabsTrigger value="Blog Moderation">
                   Blog Moderation
                 </TabsTrigger>
-                <TabsTrigger value="addProduct">Add / Edit Product</TabsTrigger>
-                <TabsTrigger value="orders">Orders</TabsTrigger>
+                <TabsTrigger value="tests">Tests</TabsTrigger>
+                <TabsTrigger value="games">Games</TabsTrigger>
                 <TabsTrigger value="settings">Settings</TabsTrigger>
               </TabsList>
               <TabsContent value="Blog Moderation">
                 <Blogmod />
               </TabsContent>
-              <TabsContent value="addProduct"></TabsContent>
-              <TabsContent value="orders"></TabsContent>
+              <TabsContent value="tests">
+                <Tabs defaultValue="grade-8">
+                  <TabsList className="w-full mb-5">
+                    <TabsTrigger value="Grade 8">Grade 8</TabsTrigger>
+                    <TabsTrigger value="Grade 9">Grade 9</TabsTrigger>
+                    <TabsTrigger value="Grade 10">Grade 10</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="Grade 8">
+                    <p>Insert Grade 8 tests</p>
+                  </TabsContent>
+                  <TabsContent value="Grade 9">
+                    <p>Insert Grade 9 tests</p>
+                  </TabsContent>
+                  <TabsContent value="Grade 10">
+                    <p>Insert Grade 10 tests</p>
+                  </TabsContent>
+                </Tabs>
+              </TabsContent>
+              <TabsContent value="games">
+                <Tabs defaultValue="grade-8">
+                  <TabsList className="w-full mb-5">
+                    <TabsTrigger value="Grade 8">Grade 8</TabsTrigger>
+                    <TabsTrigger value="Grade 9">Grade 9</TabsTrigger>
+                    <TabsTrigger value="Grade 10">Grade 10</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="Grade 8">
+                    <p>Insert Grade 8 games</p>
+                  </TabsContent>
+                  <TabsContent value="Grade 9">
+                    <p>Insert Grade 9 games</p>
+                  </TabsContent>
+                  <TabsContent value="Grade 10">
+                    <p>Insert Grade 10 games</p>
+                  </TabsContent>
+                </Tabs>
+              </TabsContent>
               <TabsContent value="settings"></TabsContent>
             </Tabs>
           </div>

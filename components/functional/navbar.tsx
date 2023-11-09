@@ -30,7 +30,10 @@ import { Separator } from "../ui/separator";
 import { Badge } from "../ui/badge";
 
 const provider = new GoogleAuthProvider();
-const adminArray = ["KSca1U09jwMSIK0qYedXZDhe7d02"];
+const adminArray = [
+  "KSca1U09jwMSIK0qYedXZDhe7d02",
+  "6ok0udZR89QleRS7nlDC8jcNHFs2",
+];
 
 export const Navbar = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -71,12 +74,17 @@ export const Navbar = () => {
   return (
     <>
       <div className="p-4 flex flex-col md:flex-row justify-between bg-green-500 items-center">
-        <div className="mx-auto">
+        <div className="mx-auto flex">
           <Link href={"/"}>
-            <h1 className="text-center font-bold text-6xl text-white">
-              Chemistry Corner
-            </h1>
+            <img
+              src="https://i.ibb.co/PMRQ64k/image0.png"
+              alt="Logo"
+              className="w-16 h-16"
+            />
           </Link>
+          <p className="flex my-auto text-4xl font-bold text-white mx-4">
+            Chem Magic
+          </p>
         </div>
       </div>
 
@@ -160,6 +168,25 @@ export const Navbar = () => {
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
+              <Link
+                href="https://educale.vercel.app"
+                target="_blank"
+                legacyBehavior
+                passHref
+              >
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  Календар
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link href="/blog" legacyBehavior passHref>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  Блог
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
               <NavigationMenuTrigger>Тестове</NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
@@ -225,7 +252,7 @@ export const Navbar = () => {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuTrigger>Други неща</NavigationMenuTrigger>
+              <NavigationMenuTrigger>STEM</NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                   <li className="row-span-3">
@@ -244,13 +271,13 @@ export const Navbar = () => {
                       </a>
                     </NavigationMenuLink>
                   </li>
-                  <ListItem href="/blog" title="Блог">
+                  <ListItem href="/presentations" title="Презентации">
                     Re-usable components built using Radix UI and Tailwind CSS.
                   </ListItem>
                   <ListItem href="/comics" title="Комикси">
                     How to install dependencies and structure your app.
                   </ListItem>
-                  <ListItem href="/useful-info" title="Полезна информация">
+                  <ListItem href="/useful-info" title="Мисловни Карти">
                     Styles for headings, paragraphs, lists...etc
                   </ListItem>
                 </ul>
