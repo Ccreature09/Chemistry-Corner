@@ -53,6 +53,7 @@ export default function BlogForm() {
       const articlesRef = collection(db, "articles");
       addDoc(articlesRef, {
         author: user.displayName,
+        pfp: user.photoURL,
         title: values.title,
         content: values.content,
         status: "pending",

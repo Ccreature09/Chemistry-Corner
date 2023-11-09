@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import UserForm from "./signIn";
-
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   signInWithPopup,
   User,
@@ -101,13 +101,10 @@ export const Navbar = () => {
             ) : user && profileImageUrl ? (
               profileImageUrl && (
                 <div className=" flex flex-col justify-center">
-                  <Image
-                    src={profileImageUrl}
-                    alt="User Profile"
-                    width={40}
-                    height={40}
-                    className=" rounded-full mx-auto"
-                  />
+                  <Avatar className="mx-auto">
+                    <AvatarImage src={profileImageUrl} alt="User" />
+                    <AvatarFallback>{user.displayName}</AvatarFallback>
+                  </Avatar>
                   {adminArray.includes(user.uid) && <Badge>Admin</Badge>}
                 </div>
               )

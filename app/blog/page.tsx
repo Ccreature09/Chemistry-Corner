@@ -9,6 +9,7 @@ import {
   query,
   serverTimestamp,
 } from "firebase/firestore";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth, db } from "@/firebase/firebase";
 import { Navbar } from "@/components/functional/navbar";
@@ -17,6 +18,8 @@ import BlogForm from "@/components/functional/blogform";
 interface Article {
   id: string;
   author: string;
+  title: string;
+  pfp: string;
   content: string;
   status: string;
   createdAt: Timestamp;
@@ -45,6 +48,8 @@ export default function Page() {
         const data = doc.data();
         const article: Article = {
           id: doc.id,
+          title: data.title,
+          pfp: data.pfp,
           author: data.author,
           content: data.content,
           status: data.status,
@@ -62,7 +67,7 @@ export default function Page() {
   const formatDate = (timestamp: Timestamp) => {
     const date = new Date(timestamp.seconds * 1000);
     const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Month is 0-based, so add 1
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const day = date.getDate().toString().padStart(2, "0");
     const hour = date.getHours().toString().padStart(2, "0");
     const minutes = date.getMinutes().toString().padStart(2, "0");
@@ -82,7 +87,17 @@ export default function Page() {
               key={index}
               className="border border-gray-300 rounded p-4 my-4"
             >
-              <p className="text-lg font-semibold">{article.author}</p>
+              <p className="text-4xl font-semibold mb-2">{article.title}</p>
+              <div className="flex mb-2">
+                <Avatar>
+                  <AvatarImage src={article.pfp} alt={article.author} />
+                  <AvatarFallback>PFP</AvatarFallback>
+                </Avatar>
+                <p className="text-lg flex my-auto mx-2 font-semibold">
+                  {article.author}
+                </p>
+              </div>
+
               <p className="text-gray-600 text-sm">
                 {formatDate(article.createdAt)}
               </p>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { db } from "@/firebase/firebase";
-
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   collection,
   doc,
@@ -16,6 +16,7 @@ interface Article {
   id: string;
   title: string;
   author: string;
+  pfp: string;
   content: string;
   status: string;
   createdAt: Timestamp;
@@ -36,6 +37,7 @@ export const Blogmod = () => {
         const data = doc.data();
         const article: Article = {
           id: doc.id,
+          pfp: data.pfp,
           title: data.title,
           author: data.author,
           content: data.content,
@@ -55,6 +57,7 @@ export const Blogmod = () => {
           id: doc.id,
           title: data.title,
           author: data.author,
+          pfp: data.pfp,
           content: data.content,
           status: data.status,
           createdAt: data.createdAt,
@@ -114,11 +117,20 @@ export const Blogmod = () => {
               className="bg-white p-4 shadow-md rounded-lg flex justify-between items-center space-x-4"
             >
               <div>
-                <p className="text-2xl font-bold">Title: {article.title}</p>
-                <p className="text-xl font-semibold">
-                  Author: {article.author}
+                <p className="text-4xl font-bold mb-2">
+                  Title: {article.title}
                 </p>
-                <p>{article.content}</p>
+                <div className="flex mb-2">
+                  <Avatar>
+                    <AvatarImage src={article.pfp} alt={article.author} />
+                    <AvatarFallback>CN</AvatarFallback>
+                  </Avatar>
+                  <p className="text-xl font-semibold my-auto mx-3 flex">
+                    {article.author}
+                  </p>
+                </div>
+
+                <p className="mb-2 text-lg">{article.content}</p>
                 <p>Date Submitted: {formatDate(article.createdAt)}</p>
               </div>
               <div className="flex items-center space-x-4">
@@ -148,11 +160,20 @@ export const Blogmod = () => {
               className="bg-white p-4 shadow-md rounded-lg flex justify-between items-center space-x-4"
             >
               <div>
-                <p className="text-2xl font-bold">Title: {article.title}</p>
-                <p className="text-xl font-semibold">
-                  Author: {article.author}
+                <p className="text-4xl font-bold mb-2">
+                  Title: {article.title}
                 </p>
-                <p>{article.content}</p>
+                <div className="flex mb-2">
+                  <Avatar>
+                    <AvatarImage src={article.pfp} alt={article.author} />
+                    <AvatarFallback>CN</AvatarFallback>
+                  </Avatar>
+                  <p className="text-xl font-semibold my-auto mx-3 flex">
+                    {article.author}
+                  </p>
+                </div>
+
+                <p className="mb-2 text-lg">{article.content}</p>
                 <p>Date Submitted: {formatDate(article.createdAt)}</p>
               </div>
               <div className="flex items-center space-x-4">
