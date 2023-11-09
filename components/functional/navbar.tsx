@@ -76,11 +76,13 @@ export const Navbar = () => {
       <div className="p-4 flex flex-col md:flex-row justify-between bg-green-500 items-center">
         <div className="mx-auto flex">
           <Link href={"/"}>
-            <img
+            <Image
               src="https://i.ibb.co/PMRQ64k/image0.png"
               alt="Logo"
+              width={64}
+              height={64}
               className="w-16 h-16"
-            />
+            ></Image>
           </Link>
           <p className="flex my-auto text-4xl font-bold text-white mx-4">
             Chem Magic
@@ -219,7 +221,7 @@ export const Navbar = () => {
               </NavigationMenuContent>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <NavigationMenuTrigger>Забавни Задачи</NavigationMenuTrigger>
+              <NavigationMenuTrigger>Игри</NavigationMenuTrigger>
               <NavigationMenuContent>
                 <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                   <li className="row-span-3">
@@ -238,13 +240,13 @@ export const Navbar = () => {
                       </a>
                     </NavigationMenuLink>
                   </li>
-                  <ListItem href="/fun-problems/grade-8" title="8 Клас">
+                  <ListItem href="/games/grade-8" title="8 Клас">
                     Re-usable components built using Radix UI and Tailwind CSS.
                   </ListItem>
-                  <ListItem href="/fun-problems/grade-9" title="9 Клас">
+                  <ListItem href="/games/grade-9" title="9 Клас">
                     How to install dependencies and structure your app.
                   </ListItem>
-                  <ListItem href="/fun-problems/grade-10" title="10 Клас">
+                  <ListItem href="/games/grade-10" title="10 Клас">
                     Styles for headings, paragraphs, lists...etc
                   </ListItem>
                 </ul>
