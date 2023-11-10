@@ -8,6 +8,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { Blogmod } from "@/components/functional/blogmod";
 import EmbedForm from "@/components/functional/EmbedForm";
+import EmbedList from "@/components/functional/EmbedList";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -58,10 +59,12 @@ export default function AdminDashboard() {
                   <TabsContent value="Grade 8">
                     <p>Insert Grade 8 tests</p>
                     <EmbedForm grade="grade-8" category="tests"></EmbedForm>
+                    <EmbedList grade="grade-8" category="tests" />
                   </TabsContent>
                   <TabsContent value="Grade 9">
                     <p>Insert Grade 9 tests</p>
                     <EmbedForm grade="grade-9" category="tests"></EmbedForm>
+                    <EmbedList grade="grade-8" category="tests" />
                   </TabsContent>
                   <TabsContent value="Grade 10">
                     <p>Insert Grade 10 tests</p>

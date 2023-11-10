@@ -56,9 +56,7 @@ const FetchEmbeds: React.FC<FetchEmbedsProps> = ({ grade, category }) => {
         {embeds.length > 0 ? (
           embeds.map((embed, index) => (
             <Link
-              href={`${
-                category == "games" ? "game" : "test"
-              }/${encodeURIComponent(embed.title)}`}
+              href={`/${category}/${grade}/${encodeURIComponent(embed.title)}`}
               key={index}
             >
               <Card>
