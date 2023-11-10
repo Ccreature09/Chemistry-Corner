@@ -92,7 +92,7 @@ const FetchEmbeds: React.FC<FetchEmbedsProps> = ({
                     embed.title
                   )}`}
                 >
-                  <CardTitle className="text-center my-3">
+                  <CardTitle className="text-center m-5">
                     {embed.title}
                   </CardTitle>
                   <CardContent>

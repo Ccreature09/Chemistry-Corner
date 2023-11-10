@@ -85,10 +85,10 @@ const EmbedForm: React.FC<EmbedFormProps> = ({ grade, category }) => {
                   name="title"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel>Title</FormLabel>
+                      <FormLabel>Заглавие</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Blog Title"
+                          placeholder="Заглавие"
                           {...field}
                           className="w-full p-2 rounded border"
                         />
@@ -103,12 +103,12 @@ const EmbedForm: React.FC<EmbedFormProps> = ({ grade, category }) => {
                   name="embed"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel>Content</FormLabel>
+                      <FormLabel>Embed Линк</FormLabel>
                       <FormControl>
                         <Textarea
                           className="w-full h-24 p-2 mb-4 border rounded"
                           {...field}
-                          placeholder="Content"
+                          placeholder="Ембед"
                         />
                       </FormControl>
 
@@ -121,12 +121,12 @@ const EmbedForm: React.FC<EmbedFormProps> = ({ grade, category }) => {
                   name="picture"
                   render={({ field }) => (
                     <FormItem className="w-full">
-                      <FormLabel>Picture URL</FormLabel>
+                      <FormLabel>Снимка Линк</FormLabel>
                       <FormControl>
                         <Textarea
                           className="w-full h-24 p-2 mb-4 border rounded"
                           {...field}
-                          placeholder="Content"
+                          placeholder="Линк"
                         />
                       </FormControl>
 

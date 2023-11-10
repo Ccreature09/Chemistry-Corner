@@ -84,24 +84,30 @@ export const Navbar = () => {
 
   return (
     <>
-      <div className="p-4 flex flex-col md:flex-row justify-between bg-green-500 items-center">
-        <div className="mx-auto flex">
+      <div className="p-4 flex flex-col md:flex-row justify-between md:hidden bg-green-500 items-center">
+        <div className="mx-auto flex flex-col md:flex-row">
           <Link href={"/"}>
             <Image
-              src="https://i.ibb.co/PMRQ64k/image0.png"
+              src="https://i.ibb.co/7XWJwZ0/image-removebg-preview-4.png"
               alt="Logo"
-              width={64}
-              height={64}
-              className="w-16 h-16"
+              width={200}
+              height={200}
+              className="w-44 mx-auto mb-3 h-44 md:w-16 md:h-16"
             ></Image>
           </Link>
-          <p className="flex my-auto text-4xl font-bold text-white mx-4">
-            Chem Magic
-          </p>
         </div>
       </div>
 
-      <div className="w-full my-auto flex justify-center bg-green-800 h-14">
+      <div className="w-full my-auto flex justify-center bg-green-800 h-18">
+        <Link href={"/"}>
+          <Image
+            src="https://i.ibb.co/7XWJwZ0/image-removebg-preview-4.png"
+            alt="Logo"
+            width={200}
+            height={200}
+            className="w-44 mx-3 my-3 hidden md:flex mb-3 h-44 md:w-16 md:h-16"
+          />
+        </Link>
         <Popover>
           <PopoverTrigger className="">
             {!user ? (
@@ -111,7 +117,7 @@ export const Navbar = () => {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-10 h-10 mx-3 "
+                className="w-10 h-10 mx-3"
               >
                 <path
                   strokeLinecap="round"
@@ -121,12 +127,14 @@ export const Navbar = () => {
               </svg>
             ) : user && profileImageUrl ? (
               profileImageUrl && (
-                <div className=" flex flex-col justify-center">
-                  <Avatar className="mx-auto">
+                <div className=" flex flex-col justify-center mx-3">
+                  <Avatar className="flex mx-auto">
                     <AvatarImage src={profileImageUrl} alt="User" />
                     <AvatarFallback>{user.displayName}</AvatarFallback>
                   </Avatar>
-                  {adminArray.includes(user.uid) && <Badge>Admin</Badge>}
+                  {adminArray.includes(user.uid) && (
+                    <Badge className="flex">Admin</Badge>
+                  )}
                 </div>
               )
             ) : (
