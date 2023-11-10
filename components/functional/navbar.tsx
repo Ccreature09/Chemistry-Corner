@@ -21,7 +21,18 @@ import {
   signOut,
   onAuthStateChanged,
 } from "firebase/auth";
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
+  DropdownMenuSubContent,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "../ui/button";
 
 import { cn } from "@/lib/utils";
@@ -160,7 +171,89 @@ export const Navbar = () => {
             )}
           </PopoverContent>
         </Popover>
-        <NavigationMenu>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="md:hidden">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-10 h-10 mx-2 text-white bg-green-500 rounded-lg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+              />
+            </svg>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>Навигация</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <Link href="/">Начална Страница</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link href="/periodic-table">Периодична Таблица</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link href="/calendar">Календар</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link href="/blog">Блог</Link>
+            </DropdownMenuItem>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Тестове</DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  <DropdownMenuItem>
+                    <Link href="/tests/grade-8">8 Клас</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/tests/grade-9">9 Клас</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/tests/grade-10">10 Клас</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Игри</DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  <DropdownMenuItem>
+                    <Link href="/games/grade-8">8 Клас</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/games/grade-9">9 Клас</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/games/gradtests/grade-8">10 Клас</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>STEM</DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  <DropdownMenuItem>
+                    <Link href="/presentations">Презентации</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/comics">Комикси</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link href="/useful-info">Мисловни Карти</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <NavigationMenu className="hidden md:flex">
           <NavigationMenuList>
             <NavigationMenuItem>
               <Link href="/periodic-table" legacyBehavior passHref>

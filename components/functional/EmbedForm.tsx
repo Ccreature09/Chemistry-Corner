@@ -29,8 +29,8 @@ const formSchema = z.object({
   picture: z.string(),
 });
 interface EmbedFormProps {
-  grade: string; // The grade prop
-  category: string; // The category prop
+  grade: string;
+  category: string;
 }
 
 const EmbedForm: React.FC<EmbedFormProps> = ({ grade, category }) => {
