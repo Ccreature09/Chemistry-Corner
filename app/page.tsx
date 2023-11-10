@@ -6,10 +6,10 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <section className="bg-blue-500 p-8 text-white">
-        <div className="container mx-auto">
-          <h1 className="text-4xl md:text-6xl font-bold text-center mb-4">
-            Добре дошли в Chemistry Corner - Вашият Портал към Света на Химията!
+      <section className=" p-8 text-black">
+        <div className=" mx-auto">
+          <h1 className="text-xl md:text-4xl lg:text-6xl lg:container font-bold text-center mb-4">
+            Добре дошли в Chem Magic - Вашият Портал към Света на Химията!
           </h1>
           <p className="text-base md:text-lg text-center">
             Интересувате се от елементите, които съставят нашия свят или сте
