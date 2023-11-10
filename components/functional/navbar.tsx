@@ -230,7 +230,7 @@ export const Navbar = () => {
                     <Link href="/games/grade-9">9 Клас</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem>
-                    <Link href="/games/gradtests/grade-8">10 Клас</Link>
+                    <Link href="/games/grade-10">10 Клас</Link>
                   </DropdownMenuItem>
                 </DropdownMenuSubContent>
               </DropdownMenuPortal>
