@@ -84,113 +84,33 @@ export const Navbar = () => {
 
   return (
     <>
-      <div className="p-1 flex flex-col md:flex-row justify-between bg-green-500 items-center">
+      <div className="py-20 flex flex-col md:flex-row justify-between md:hidden bg-blue-500 items-center">
         <div className="mx-auto flex flex-col md:flex-row">
           <Link href={"/"}>
             <Image
-              src="https://i.ibb.co/7XWJwZ0/image-removebg-preview-4.png"
+              src="https://i.ibb.co/kX703qN/image-1.png"
               alt="Logo"
               width={200}
               height={200}
-              className="w-64 mx-auto mb-3 md:hidden h-64 md:w-16 md:h-16"
+              className="w-96 mx-auto mb-3 md:hidden  md:w-16 "
             ></Image>
           </Link>
         </div>
-        <div className="justify-end flex">
-          <Popover>
-            <PopoverTrigger className="">
-              {!user ? (
-                <>
-                  <div className="bg-green-500 rounded-lg flex">
-                    <p className="text-4xl my-auto flex px-5 font-medium">
-                      Вход
-                    </p>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-8 h-8 m-2 text-white"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                  </div>
-                </>
-              ) : user && profileImageUrl ? (
-                profileImageUrl && (
-                  <div className=" flex flex-col justify-center mx-3">
-                    <Avatar className="flex mx-auto">
-                      <AvatarImage src={profileImageUrl} alt="User" />
-                      <AvatarFallback>{user.displayName}</AvatarFallback>
-                    </Avatar>
-                    {adminArray.includes(user.uid) && (
-                      <Badge className="flex">Admin</Badge>
-                    )}
-                  </div>
-                )
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-10 h-10 "
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-              )}
-            </PopoverTrigger>
-            <PopoverContent>
-              {user && adminArray.includes(user.uid) && (
-                <Link href={"/admin"}>
-                  <Button className="w-full">Admin Dashboard</Button>
-                </Link>
-              )}
-              {!user ? (
-                <>
-                  <h1 className=" text-center mb-8 font-bold text-2xl">
-                    Вход / Регистрация
-                  </h1>
-                  <Button className="w-full mb-5" onClick={handleGoogleSignIn}>
-                    Вход с Google
-                  </Button>
-                  <UserForm login />
-                  <Separator className="mb-5" />
-                  <UserForm login={false} />
-                </>
-              ) : (
-                <Button className="w-full mt-4" onClick={handleSignOut}>
-                  Изход
-                </Button>
-              )}
-            </PopoverContent>
-          </Popover>
-        </div>
       </div>
 
-      <div className="w-full my-auto flex justify-center bg-blue-500 h-18">
+      <div className="w-full my-auto flex justify-start bg-blue-500 h-24">
         <div className="justify-start flex">
           <Link href={"/"}>
             <Image
-              src="https://i.ibb.co/7XWJwZ0/image-removebg-preview-4.png"
+              src="https://i.ibb.co/kX703qN/image-1.png"
               alt="Logo"
-              width={200}
-              height={200}
-              className="w-44 mx-24 hidden my-2 md:flex mb-3 h-44 md:w-16 md:h-16"
+              width={1000}
+              height={1000}
+              className="w-44 mx-24 my-4 hidden  md:flex mb-3 md:w-96 "
             />
           </Link>
         </div>
-        <div className="flex p-2">
+        <div className="flex p-2 mx-2">
           <DropdownMenu>
             <DropdownMenuTrigger className="md:hidden">
               <svg
@@ -199,7 +119,7 @@ export const Navbar = () => {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-full h-10 mx-2 text-white bg-green-500 rounded-lg"
+                className="w-16 h-16 my-auto  text-blue-500 bg-white rounded-lg"
               >
                 <path
                   strokeLinecap="round"
@@ -273,6 +193,7 @@ export const Navbar = () => {
               </DropdownMenuSub>
             </DropdownMenuContent>
           </DropdownMenu>
+
           <NavigationMenu className="hidden md:flex">
             <NavigationMenuList className="gap-3">
               <NavigationMenuItem>
@@ -283,12 +204,7 @@ export const Navbar = () => {
                 </Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link
-                  href="https://educale.vercel.app"
-                  target="_blank"
-                  legacyBehavior
-                  passHref
-                >
+                <Link href="/calendar" target="_blank" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                     Календар
                   </NavigationMenuLink>
@@ -403,6 +319,83 @@ export const Navbar = () => {
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
+          <div className="absolute right-4 top-23 ">
+            <Popover>
+              <PopoverTrigger className="">
+                {!user ? (
+                  <>
+                    <div className=" rounded-lg text-white p-2 flex">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-16 rounded-lg p-1 text-white bg-white"
+                        viewBox="0 0 512 512"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        id="login"
+                      >
+                        <path d="M255.988 32C160.473 32 78.934 91.804 46.727 176h34.639c9.396-20.484 22.457-39.35 38.868-55.762C156.497 83.973 204.709 64 255.988 64c51.286 0 99.504 19.973 135.771 56.239C428.027 156.505 448 204.719 448 256c0 51.285-19.973 99.501-56.239 135.765C355.494 428.029 307.275 448 255.988 448c-51.281 0-99.493-19.971-135.755-56.234-16.412-16.412-29.473-35.28-38.871-55.766H46.725c32.206 84.201 113.746 144 209.264 144C379.703 480 480 379.715 480 256c0-123.702-100.297-224-224.012-224z"></path>
+                        <path d="M206.863 323.883l22.627 22.627L320 256l-90.51-90.51-22.628 22.628L258.745 240H32v32h226.745z"></path>
+                      </svg>
+                    </div>
+                  </>
+                ) : user && profileImageUrl ? (
+                  profileImageUrl && (
+                    <div className=" flex flex-col justify-center mx-3">
+                      <Avatar className="flex mx-auto">
+                        <AvatarImage src={profileImageUrl} alt="User" />
+                        <AvatarFallback>{user.displayName}</AvatarFallback>
+                      </Avatar>
+                      {adminArray.includes(user.uid) && (
+                        <Badge className="flex">Admin</Badge>
+                      )}
+                    </div>
+                  )
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-10 h-10 "
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                )}
+              </PopoverTrigger>
+              <PopoverContent>
+                {user && adminArray.includes(user.uid) && (
+                  <Link href={"/admin"}>
+                    <Button className="w-full">Admin Dashboard</Button>
+                  </Link>
+                )}
+                {!user ? (
+                  <>
+                    <h1 className=" text-center mb-8 font-bold text-2xl">
+                      Вход / Регистрация
+                    </h1>
+                    <Button
+                      className="w-full mb-5"
+                      onClick={handleGoogleSignIn}
+                    >
+                      Вход с Google
+                    </Button>
+                    <UserForm login />
+                    <Separator className="mb-5" />
+                    <UserForm login={false} />
+                  </>
+                ) : (
+                  <Button className="w-full mt-4" onClick={handleSignOut}>
+                    Изход
+                  </Button>
+                )}
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </div>
     </>
