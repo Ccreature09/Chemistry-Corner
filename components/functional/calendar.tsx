@@ -407,7 +407,7 @@ const Calendar: React.FC = () => {
         </div>
       )}
 
-      <div className="w-1/4 bg-gray-200 p-4">
+      <div className="w-1/4 bg-gray-200 hidden md:block p-4">
         <div className="mb-4">
           <div className="mb-4">
             <h1 className="text-3xl font-semibold mb-3 text-center">
