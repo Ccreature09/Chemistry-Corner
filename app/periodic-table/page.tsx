@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Navbar } from "@/components/functional/navbar";
 import { Footer } from "@/components/functional/footer";
 import { Button } from "@/components/ui/button";
+import { Divide } from "lucide-react";
 var pt = require("periodic-table");
 
 interface ElementTableProps {
@@ -49,7 +50,7 @@ const ElementGrid: React.FC<ElementTableProps> = ({
     >
       {element ? (
         <div
-          className={`border-2 relative w-24 h-24 flex flex-col items-center justify-center hover:scale-150 hover:text-white hover:cursor-pointer transform hover:bg-blue-500 hover:z-10 transition-transform duration-200 ${
+          className={`border-2 border-blue-400 shadow-xl relative w-24 h-24 flex flex-col items-center justify-center hover:scale-150 hover:text-white hover:cursor-pointer transform hover:bg-blue-500 hover:z-10 transition-transform duration-200 ${
             selectedElement === element ? "bg-gray-300" : ""
           }`}
         >
@@ -106,6 +107,8 @@ const ElementGrid: React.FC<ElementTableProps> = ({
 const Page: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedElement, setSelectedElement] = useState<Element | null>(null);
+  const [shortDescription, setShortDescription] = useState<boolean>(false);
+
   const handleElementClick = (element: Element | null) => {
     setSelectedElement(element);
     setIsModalOpen(true);
@@ -118,8 +121,8 @@ const Page: React.FC = () => {
       <Navbar />
 
       <div className="p-4">
-        <h1 className="text-2xl font-semibold mb-4 text-center">
-          Periodic Table (Grid)
+        <h1 className="text-5xl text-blue-500 font-semibold mb-4 text-center">
+          Периодична Таблица
         </h1>
         <ElementGrid
           elements={[...elements, ...emptyCells]}
@@ -152,6 +155,17 @@ const Page: React.FC = () => {
                   <Button
                     className="btn btn-clear"
                     onClick={() => {
+                      setShortDescription(true);
+                      if (shortDescription) {
+                        setShortDescription(false);
+                      }
+                    }}
+                  >
+                    {shortDescription ? "Short" : "Long"}
+                  </Button>
+                  <Button
+                    className="btn btn-clear"
+                    onClick={() => {
                       setIsModalOpen(false);
                     }}
                   >
@@ -171,42 +185,92 @@ const Page: React.FC = () => {
                     </svg>
                   </Button>
                 </div>
-                <div className="modal-body mt-4">
-                  <p className="text-lg">
-                    Also known as{" "}
-                    <span className="font-semibold">
-                      {selectedElement?.symbol}
-                    </span>
-                    . <br /> It has an atomic number of{" "}
-                    <span className="font-semibold">
-                      {selectedElement?.atomicNumber}
-                    </span>{" "}
-                    and an atomic mass of{" "}
-                    <span className="font-semibold">
-                      {selectedElement?.atomicMass} amu
-                    </span>{" "}
-                    . This element belongs to the{" "}
-                    <span className="font-semibold">
-                      {selectedElement?.groupBlock}
-                    </span>{" "}
-                    group and has a density of{" "}
-                    <span className="font-semibold">
-                      {selectedElement?.density} g/cm³
-                    </span>{" "}
-                    . Its boiling point is{" "}
-                    <span className="font-semibold">
-                      {selectedElement?.boilingPoint} K
-                    </span>{" "}
-                    , and it exhibits a {selectedElement?.bondingType} bonding
-                    type. <br />
-                    {selectedElement?.yearDiscovered == "Ancient"
-                      ? `${selectedElement?.name} is Ancient.`
-                      : `${
-                          selectedElement?.name
-                        } was discovered in the year ${" "}
+                {shortDescription ? (
+                  <div className="modal-body mt-4">
+                    <p className="text-lg">
+                      Also known as{" "}
+                      <span className="font-semibold">
+                        {selectedElement?.symbol}
+                      </span>
+                      .
+                      <br /> It has an atomic number of{" "}
+                      <span className="font-semibold">
+                        {selectedElement?.atomicNumber}
+                      </span>{" "}
+                      and an atomic mass of{" "}
+                      <span className="font-semibold">
+                        {selectedElement?.atomicMass} amu
+                      </span>{" "}
+                      . This element belongs to the{" "}
+                      <span className="font-semibold">
+                        {selectedElement?.groupBlock}
+                      </span>{" "}
+                      group and has a density of{" "}
+                      <span className="font-semibold">
+                        {selectedElement?.density} g/cm³
+                      </span>{" "}
+                      . Its boiling point is{" "}
+                      <span className="font-semibold">
+                        {selectedElement?.boilingPoint} K
+                      </span>{" "}
+                      , and it exhibits a{" "}
+                      <span className="font-semibold">
+                        {selectedElement?.bondingType}
+                      </span>{" "}
+                      bonding type. <br />
+                      {selectedElement?.yearDiscovered == "Ancient"
+                        ? `${selectedElement?.name} is Ancient.`
+                        : `${
+                            selectedElement?.name
+                          } was discovered in the year ${" "}
                     ${selectedElement?.yearDiscovered}. `}
-                  </p>
-                </div>
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-lg">
+                      Symbol:{" "}
+                      <span className="font-semibold">
+                        {selectedElement?.symbol}
+                      </span>
+                      <br />
+                      Atomic Number:{" "}
+                      <span className="font-semibold">
+                        {selectedElement?.atomicNumber}
+                      </span>{" "}
+                      <br />
+                      Atomic Mass:{" "}
+                      <span className="font-semibold">
+                        {selectedElement?.atomicMass} amu
+                      </span>{" "}
+                      <br /> Group:{" "}
+                      <span className="font-semibold">
+                        {selectedElement?.groupBlock}
+                      </span>{" "}
+                      <br />
+                      Density:{" "}
+                      <span className="font-semibold">
+                        {selectedElement?.density} g/cm³
+                      </span>{" "}
+                      <br />
+                      Its boiling point is{" "}
+                      <span className="font-semibold">
+                        {selectedElement?.boilingPoint} K
+                      </span>{" "}
+                      <br /> It exhibits a{" "}
+                      <span className="font-semibold">
+                        {selectedElement?.bondingType}
+                      </span>{" "}
+                      bonding type. <br />
+                      {selectedElement?.yearDiscovered == "Ancient"
+                        ? `${selectedElement?.name} is Ancient.`
+                        : `${
+                            selectedElement?.name
+                          } was discovered in the year ${" "}
+                    ${selectedElement?.yearDiscovered}. `}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
