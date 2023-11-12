@@ -479,6 +479,7 @@ const Calendar: React.FC = () => {
           select={handleDateSelect}
           eventContent={renderEventContent}
           unselectAuto={false}
+          longPressDelay={0}
           locale="bg"
           editable={isAdmin}
           selectable={isAdmin}
