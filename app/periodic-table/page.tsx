@@ -253,20 +253,18 @@ const Page: React.FC = () => {
                         {selectedElement?.density} g/cm³
                       </span>{" "}
                       <br />
-                      Its boiling point is{" "}
+                      Boiling Point:{" "}
                       <span className="font-semibold">
                         {selectedElement?.boilingPoint} K
                       </span>{" "}
-                      <br /> It exhibits a{" "}
+                      <br /> Bonding Type:{" "}
                       <span className="font-semibold">
                         {selectedElement?.bondingType}
                       </span>{" "}
-                      bonding type. <br />
+                      <br />
                       {selectedElement?.yearDiscovered == "Ancient"
                         ? `${selectedElement?.name} is Ancient.`
-                        : `${
-                            selectedElement?.name
-                          } was discovered in the year ${" "}
+                        : `${selectedElement?.name} Year of discovery: ${" "}
                     ${selectedElement?.yearDiscovered}. `}
                     </p>
                   </div>

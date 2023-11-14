@@ -98,8 +98,8 @@ export const Navbar = () => {
         </div>
       </div>
 
-      <div className="w-full my-auto flex justify-start bg-blue-500 h-24">
-        <div className="justify-start flex">
+      <div className="w-full my-auto flex justify-between items-center bg-blue-500 h-24">
+        <div className="flex items-center">
           <Link href={"/"}>
             <Image
               src="https://i.ibb.co/kX703qN/image-1.png"
@@ -110,9 +110,9 @@ export const Navbar = () => {
             />
           </Link>
         </div>
-        <div className="flex p-2 mx-2">
+        <div className="flex  md:space-x-36">
           <DropdownMenu>
-            <DropdownMenuTrigger className="md:hidden">
+            <DropdownMenuTrigger className="xl:hidden">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -194,7 +194,7 @@ export const Navbar = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <NavigationMenu className="hidden md:flex">
+          <NavigationMenu className="hidden xl:flex">
             <NavigationMenuList className="gap-3">
               <NavigationMenuItem>
                 <Link href="/periodic-table" legacyBehavior passHref>
@@ -319,7 +319,7 @@ export const Navbar = () => {
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
-          <div className="absolute right-4 top-23 ">
+          <div className="flex items-center mx-2">
             <Popover>
               <PopoverTrigger className="">
                 {!user ? (
