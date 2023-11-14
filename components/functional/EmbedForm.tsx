@@ -71,7 +71,7 @@ const EmbedForm: React.FC<EmbedFormProps> = ({ grade, category }) => {
     <>
       <Dialog>
         <DialogTrigger className="dark:bg-white mb-5 dark:text-black text-sm text-white bg-slate-900 dark:hover:bg-slate-50/90 hover:bg-slate-900/90 w-full py-2 rounded-md">
-          Create new embed
+          Добави Ембед
         </DialogTrigger>
 
         <DialogContent>

@@ -83,7 +83,7 @@ const FetchEmbeds: React.FC<FetchEmbedsProps> = ({
       <p className="text-center text-6xl font-bold my-3">
         {grade} {category}
       </p>
-      <div className=" m-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
         {embeds.length > 0
           ? embeds.map((embed, index) => (
               <Card key={index}>
@@ -92,7 +92,7 @@ const FetchEmbeds: React.FC<FetchEmbedsProps> = ({
                     embed.title
                   )}`}
                 >
-                  <CardTitle className="text-center m-5">
+                  <CardTitle className="text-center  m-5">
                     {embed.title}
                   </CardTitle>
                   <CardContent>

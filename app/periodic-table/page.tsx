@@ -264,7 +264,7 @@ const Page: React.FC = () => {
                       <br />
                       {selectedElement?.yearDiscovered == "Ancient"
                         ? `${selectedElement?.name} is Ancient.`
-                        : `${selectedElement?.name} Year of discovery: ${" "}
+                        : `Year of discovery: ${" "}
                     ${selectedElement?.yearDiscovered}. `}
                     </p>
                   </div>

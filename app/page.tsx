@@ -23,7 +23,6 @@ export default function Home() {
       <section className="bg-white py-12">
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Blog Section */}
             <div className="p-4">
               <h2 className="text-4xl md:text-3xl lg:text-4xl font-semibold text-blue-500 mb-4">
                 Блог
@@ -36,7 +35,6 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Comics Section */}
             <div className="p-4">
               <h2 className="text-4xl md:text-3xl lg:text-4xl font-semibold text-blue-500 mb-4">
                 Комикси
@@ -48,7 +46,6 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Fun Problems Section */}
             <div className="p-4">
               <h2 className="text-4xl md:text-3xl lg:text-4xl font-semibold text-blue-500 mb-4">
                 Забавни Задачи
@@ -60,7 +57,6 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Tests Section */}
             <div className="p-4">
               <h2 className="text-4xl md:text-3xl lg:text-4xl font-semibold text-blue-500 mb-4">
                 Тестове
@@ -73,7 +69,6 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Periodic Table Section */}
             <div className="p-4">
               <h2 className="text-4xl md:text-3xl lg:text-4xl font-semibold text-blue-500 mb-4">
                 Периодична Таблица

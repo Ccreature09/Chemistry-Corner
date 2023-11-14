@@ -9,7 +9,6 @@ export default function page() {
       <div className="m-4">
         <Calendar />
       </div>
-
       <Footer />
     </>
   );

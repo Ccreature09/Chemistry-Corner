@@ -33,17 +33,17 @@ export default function AdminDashboard() {
   return (
     <div className="bg-gray-100 min-h-screen">
       <Navbar />
-      <div className="max-w-3xl mx-auto p-4">
+      <div className="mx-auto p-4 max-w-screen-xl">
         {isAdmin && (
           <div className="container mx-auto p-4">
             <Tabs defaultValue="Blog Moderation" className="">
               <TabsList className="w-full mb-5">
                 <TabsTrigger value="Blog Moderation">
-                  Blog Moderation
+                  Блог Управление
                 </TabsTrigger>
-                <TabsTrigger value="tests">Tests</TabsTrigger>
-                <TabsTrigger value="games">Games</TabsTrigger>
-                <TabsTrigger value="settings">Settings</TabsTrigger>
+                <TabsTrigger value="tests">Тестове</TabsTrigger>
+                <TabsTrigger value="games">Игри</TabsTrigger>
+                <TabsTrigger value="settings">Настройки</TabsTrigger>
               </TabsList>
               <TabsContent value="Blog Moderation">
                 <Blogmod />
@@ -51,12 +51,11 @@ export default function AdminDashboard() {
               <TabsContent value="tests">
                 <Tabs defaultValue="grade-8">
                   <TabsList className="w-full mb-5">
-                    <TabsTrigger value="Grade 8">Grade 8</TabsTrigger>
-                    <TabsTrigger value="Grade 9">Grade 9</TabsTrigger>
-                    <TabsTrigger value="Grade 10">Grade 10</TabsTrigger>
+                    <TabsTrigger value="Grade 8">8 клас</TabsTrigger>
+                    <TabsTrigger value="Grade 9">9 клас</TabsTrigger>
+                    <TabsTrigger value="Grade 10">10 клас</TabsTrigger>
                   </TabsList>
                   <TabsContent value="Grade 8">
-                    <p>Insert Grade 8 tests</p>
                     <EmbedForm grade="grade-8" category="tests"></EmbedForm>
                     <FetchEmbeds
                       grade="grade-8"
@@ -65,7 +64,6 @@ export default function AdminDashboard() {
                     ></FetchEmbeds>
                   </TabsContent>
                   <TabsContent value="Grade 9">
-                    <p>Insert Grade 9 tests</p>
                     <EmbedForm grade="grade-9" category="tests"></EmbedForm>
                     <FetchEmbeds
                       grade="grade-9"
@@ -74,7 +72,6 @@ export default function AdminDashboard() {
                     ></FetchEmbeds>
                   </TabsContent>
                   <TabsContent value="Grade 10">
-                    <p>Insert Grade 10 tests</p>
                     <EmbedForm grade="grade-10" category="tests"></EmbedForm>
                     <FetchEmbeds
                       grade="grade-10"
@@ -87,12 +84,11 @@ export default function AdminDashboard() {
               <TabsContent value="games">
                 <Tabs defaultValue="grade-8">
                   <TabsList className="w-full mb-5">
-                    <TabsTrigger value="Grade 8">Grade 8</TabsTrigger>
-                    <TabsTrigger value="Grade 9">Grade 9</TabsTrigger>
-                    <TabsTrigger value="Grade 10">Grade 10</TabsTrigger>
+                    <TabsTrigger value="Grade 8">8 клас</TabsTrigger>
+                    <TabsTrigger value="Grade 9">9 клас</TabsTrigger>
+                    <TabsTrigger value="Grade 10">10 клас</TabsTrigger>
                   </TabsList>
                   <TabsContent value="Grade 8">
-                    <p>Insert Grade 8 games</p>
                     <EmbedForm grade="grade-8" category="games"></EmbedForm>
                     <FetchEmbeds
                       grade="grade-8"
@@ -101,7 +97,6 @@ export default function AdminDashboard() {
                     ></FetchEmbeds>
                   </TabsContent>
                   <TabsContent value="Grade 9">
-                    <p>Insert Grade 9 games</p>
                     <EmbedForm grade="grade-9" category="games"></EmbedForm>
                     <FetchEmbeds
                       grade="grade-9"
@@ -110,7 +105,6 @@ export default function AdminDashboard() {
                     ></FetchEmbeds>
                   </TabsContent>
                   <TabsContent value="Grade 10">
-                    <p>Insert Grade 10 games</p>
                     <EmbedForm grade="grade-10" category="games"></EmbedForm>
                     <FetchEmbeds
                       grade="grade-10"
