@@ -99,9 +99,9 @@ const FetchEmbeds: React.FC<FetchEmbedsProps> = ({
           ? embeds.map((embed, index) => (
               <Card key={index}>
                 <Link
-                  href={`/${category}/${grade}/${encodeURIComponent(
-                    embed.title
-                  )}`}
+                  href={`/${category}/${
+                    grade ? grade : "presentation"
+                  }/${encodeURIComponent(embed.title)}`}
                 >
                   <CardTitle className="text-center  m-5">
                     {embed.title}
@@ -128,7 +128,7 @@ const FetchEmbeds: React.FC<FetchEmbedsProps> = ({
                 )}
               </Card>
             ))
-          : Array.from({ length: 16 }, (_, index) => (
+          : Array.from({ length: embeds.length }, (_, index) => (
               <Skeleton key={index} className="w-[450px] h-[500px]" />
             ))}
       </div>

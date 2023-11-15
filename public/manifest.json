@@ -1,9 +1,10 @@
 {
-  "name": "Prodanova's Chemistry Corner",
-  "short_name": "Chemistry Corner",
-  "theme_color": "#2196f3",
-  "background_color": "#2196f3",
+  "name": "Chemistry Magic",
+  "short_name": "Chem Magic",
+  "theme_color": "#fff",
+  "background_color": "#fff",
   "display": "standalone",
+  "orientation": "portrait",
   "scope": "/",
   "start_url": "/",
   "icons": [
@@ -46,12 +47,6 @@
       "src": "images/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
-    },
-    {
-      "src": "images/icons/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "maskable"
     }
   ]
 }
