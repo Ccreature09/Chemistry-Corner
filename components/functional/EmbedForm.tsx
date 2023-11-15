@@ -29,7 +29,7 @@ const formSchema = z.object({
   picture: z.string(),
 });
 interface EmbedFormProps {
-  grade: string;
+  grade?: string;
   category: string;
 }
 
@@ -56,7 +56,12 @@ const EmbedForm: React.FC<EmbedFormProps> = ({ grade, category }) => {
   });
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (user) {
-      const embedRef = collection(db, "embeds", category, grade);
+      const embedRef = collection(
+        db,
+        "embeds",
+        category,
+        grade || "presentations"
+      );
       addDoc(embedRef, {
         title: values.title,
         embed: values.embed,

@@ -19,7 +19,7 @@ interface Embed {
 }
 
 interface FetchEmbedsProps {
-  grade: string;
+  grade?: string;
   category: string;
   admin?: boolean;
 }
@@ -31,7 +31,12 @@ const FetchEmbeds: React.FC<FetchEmbedsProps> = ({
 }) => {
   const [embeds, setEmbeds] = useState<Embed[]>([]);
   const fetchEmbeds = async () => {
-    const embedRef = collection(db, "embeds", category, grade);
+    const embedRef = collection(
+      db,
+      "embeds",
+      category,
+      grade || "presentations"
+    ); // Adjust for 'presentations' subcollection
     const embedsQuery = query(embedRef);
 
     try {
@@ -53,13 +58,19 @@ const FetchEmbeds: React.FC<FetchEmbedsProps> = ({
       console.error("Error fetching embeds: ", error);
     }
   };
+
   useEffect(() => {
     fetchEmbeds();
   }, [grade, category]);
 
   const handleDelete = async (title: string) => {
     try {
-      const embedRef = collection(db, "embeds", category, grade);
+      const embedRef = collection(
+        db,
+        "embeds",
+        category,
+        grade || "presentations"
+      );
       const q = query(embedRef, where("title", "==", title));
 
       const querySnapshot = await getDocs(q);

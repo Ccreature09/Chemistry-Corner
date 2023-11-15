@@ -327,7 +327,7 @@ export const Navbar = () => {
                   <div className=" rounded-lg text-white p-2 flex">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="w-12 rounded-lg p-1 text-white bg-white"
+                      className="w-16 rounded-lg p-1 text-white bg-white"
                       viewBox="0 0 512 512"
                       strokeWidth={1.5}
                       stroke="currentColor"
@@ -394,6 +394,7 @@ export const Navbar = () => {
           </Popover>
         </div>
       </div>
+      <div className="bg-green-500 w-full h-8 flex flex-col"></div>
     </>
   );
 };

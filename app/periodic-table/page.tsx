@@ -149,11 +149,11 @@ const Page: React.FC = () => {
             >
               <div className="modal-content">
                 <div className="modal-header flex justify-between items-center border-b pb-4 ">
-                  <h3 className="modal-title text-3xl font-bold">
+                  <h3 className="modal-title text-xl md:text-3xl font-bold mx-2">
                     {selectedElement?.name}
                   </h3>
                   <Button
-                    className="btn btn-clear"
+                    className="mx-2"
                     onClick={() => {
                       setShortDescription(true);
                       if (shortDescription) {
@@ -164,7 +164,7 @@ const Page: React.FC = () => {
                     {shortDescription ? "Short" : "Long"}
                   </Button>
                   <Button
-                    className="btn btn-clear"
+                    className="mx-2"
                     onClick={() => {
                       setIsModalOpen(false);
                     }}
