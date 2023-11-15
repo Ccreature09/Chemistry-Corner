@@ -92,6 +92,7 @@ export const Navbar = () => {
               alt="Logo"
               width={200}
               height={200}
+              priority
               className="w-96 mx-auto mb-3 md:hidden  md:w-16 "
             ></Image>
           </Link>
@@ -107,6 +108,7 @@ export const Navbar = () => {
                 alt="Logo"
                 width={1000}
                 height={1000}
+                priority
                 className="w-44  my-auto hidden  md:flex mb-3 md:w-96 "
               />
             </Link>
