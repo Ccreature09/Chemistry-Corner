@@ -5,7 +5,7 @@ import { db } from "@/firebase/firebase";
 import { Navbar } from "@/components/functional/navbar";
 import { Footer } from "@/components/functional/footer";
 
-interface Embed {
+interface Presentation {
   title: string;
   embed: string;
 }
@@ -13,7 +13,7 @@ interface Embed {
 export default function Page({ params }: { params: { id: string[] } }) {
   const [slug, setSlug] = useState(params.id);
   const [title, setTitle] = useState("");
-  const [embedData, setEmbedData] = useState<Embed>();
+  const [embedData, setEmbedData] = useState<Presentation>();
 
   useEffect(() => {
     if (slug) {
@@ -24,7 +24,7 @@ export default function Page({ params }: { params: { id: string[] } }) {
         .then((querySnapshot) => {
           if (!querySnapshot.empty) {
             const docs = querySnapshot.docs[0];
-            const embedData = docs.data() as Embed;
+            const embedData = docs.data() as Presentation;
             setTitle(embedData.title);
             setEmbedData(embedData);
           } else {
@@ -42,20 +42,13 @@ export default function Page({ params }: { params: { id: string[] } }) {
       <Navbar />
       {embedData && (
         <div className="max-w-3xl mx-auto p-4">
-          <h2 className="text-3xl font-bold mb-4">{title}</h2>
+          <h2 className="text-3xl text-center font-bold mb-4">{title}</h2>
           <div
-            className="w-24"
+            className="mx-auto flex"
             dangerouslySetInnerHTML={{ __html: embedData.embed }}
           />
         </div>
       )}
-      <button
-        onClick={() => {
-          console.log(...slug);
-        }}
-      >
-        sdsd
-      </button>
       <Footer />
     </>
   );

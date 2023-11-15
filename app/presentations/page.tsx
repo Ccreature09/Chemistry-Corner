@@ -11,28 +11,23 @@ interface Presentation {
   title: string;
 }
 
-export const getPresentations = async () => {
-  const presentationsCol = collection(
-    db,
-    "embeds",
-    "presentations",
-    "presentations"
-  );
-  const presentationSnapshot = await getDocs(query(presentationsCol));
-  const presentationList: Presentation[] = presentationSnapshot.docs.map(
-    (doc) => doc.data() as Presentation
-  );
-  return presentationList;
-};
-
 export default function Page() {
   const [presentations, setPresentations] = useState<Presentation[]>([]);
   const [currentPresentationIndex, setCurrentPresentationIndex] = useState(0);
 
   useEffect(() => {
     const fetchPresentations = async () => {
-      const data = await getPresentations();
-      setPresentations(data);
+      const presentationsCol = collection(
+        db,
+        "embeds",
+        "presentations",
+        "presentations"
+      );
+      const presentationSnapshot = await getDocs(query(presentationsCol));
+      const presentationList: Presentation[] = presentationSnapshot.docs.map(
+        (doc) => doc.data() as Presentation
+      );
+      setPresentations(presentationList);
     };
 
     fetchPresentations();
