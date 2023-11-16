@@ -13,6 +13,7 @@ import {
   query,
   QuerySnapshot,
 } from "firebase/firestore";
+import Image from "next/image";
 interface Plan {
   name: string;
   mainPicture: string;
@@ -68,7 +69,13 @@ export default function Page({ params }: { params: { id: string } }) {
         <Slider {...settings}>
           {pages.map((page, index) => (
             <div key={index}>
-              <img src={page.src} alt={page.alt} className="w-full h-auto" />
+              <Image
+                src={page.src}
+                alt={page.alt}
+                width={1000}
+                className="w-full"
+                height={0}
+              />
             </div>
           ))}
         </Slider>
