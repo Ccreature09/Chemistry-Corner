@@ -145,6 +145,9 @@ export const Navbar = () => {
               <DropdownMenuItem>
                 <Link href="/blog">Блог</Link>
               </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link href="/plans">Планове</Link>
+              </DropdownMenuItem>
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>Тестове</DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
@@ -316,6 +319,13 @@ export const Navbar = () => {
                 <Link href="/blog" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                     Блог
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Link href="plans" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Планове
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>

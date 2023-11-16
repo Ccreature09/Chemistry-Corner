@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { Blogmod } from "@/components/functional/blogmod";
 import EmbedForm from "@/components/functional/EmbedForm";
 import FetchEmbeds from "@/components/functional/FetchEmbeds";
+import PlanForm from "@/components/functional/planform";
 export default function AdminDashboard() {
   const router = useRouter();
 
@@ -45,6 +46,7 @@ export default function AdminDashboard() {
                 <TabsTrigger value="games">Игри</TabsTrigger>
                 <TabsTrigger value="presentations">Презентации</TabsTrigger>
                 <TabsTrigger value="comics">Комикси</TabsTrigger>
+                <TabsTrigger value="plans">Планове</TabsTrigger>
 
                 <TabsTrigger value="settings">Настройки</TabsTrigger>
               </TabsList>
@@ -126,6 +128,9 @@ export default function AdminDashboard() {
                 <EmbedForm category="comics"></EmbedForm>
 
                 <FetchEmbeds category="comics" admin />
+              </TabsContent>
+              <TabsContent value="plans">
+                <PlanForm />
               </TabsContent>
               <TabsContent value="settings"></TabsContent>
             </Tabs>

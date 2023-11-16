@@ -71,11 +71,17 @@ const FetchEmbeds: React.FC<FetchEmbedsProps> = ({
 
   const handleDelete = async (title: string) => {
     try {
+      const collectionName =
+        category === "comics" && !grade
+          ? "comics"
+          : category === "presentations" && !grade
+          ? "presentations"
+          : category;
       const embedRef = collection(
         db,
         "embeds",
-        category,
-        grade || "presentations"
+        collectionName,
+        grade || category
       );
       const q = query(embedRef, where("title", "==", title));
 
@@ -98,9 +104,20 @@ const FetchEmbeds: React.FC<FetchEmbedsProps> = ({
   return (
     <>
       <p className="text-center text-6xl font-bold my-3">
-        {grade} {category}
+        {category === "games"
+          ? "Игри за "
+          : category === "tests"
+          ? "Тестове за "
+          : category === "presentations"
+          ? "Презентации"
+          : category === "comics" && "Комикси"}
+        {grade && grade === "grade-8"
+          ? "8 клас"
+          : grade && grade === "grade-9"
+          ? "9 клас"
+          : grade && grade === "grade-10" && "10 клас"}
       </p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 m-10">
         {embeds.length > 0
           ? embeds.map((embed, index) => (
               <Card key={index}>
@@ -138,8 +155,8 @@ const FetchEmbeds: React.FC<FetchEmbedsProps> = ({
                 )}
               </Card>
             ))
-          : Array.from({ length: embeds.length }, (_, index) => (
-              <Skeleton key={index} className="w-[450px] h-[500px]" />
+          : Array.from({ length: 4 }, (_, index) => (
+              <Skeleton key={index} className="w-[450px] my-10 h-[500px]" />
             ))}
       </div>
     </>
