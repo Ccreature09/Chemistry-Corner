@@ -1,11 +1,15 @@
-import React from "react";
+"use client";
+
 import { Navbar } from "@/components/functional/navbar";
 import { Footer } from "@/components/functional/footer";
+import FetchEmbeds from "@/components/functional/FetchEmbeds";
+
 export default function Page() {
   return (
     <>
-      <Navbar />
-      <Footer />
+      <Navbar></Navbar>
+      <FetchEmbeds category="comics"></FetchEmbeds>
+      <Footer></Footer>
     </>
   );
 }

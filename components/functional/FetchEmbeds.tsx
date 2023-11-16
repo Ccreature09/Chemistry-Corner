@@ -30,13 +30,19 @@ const FetchEmbeds: React.FC<FetchEmbedsProps> = ({
   admin = false,
 }) => {
   const [embeds, setEmbeds] = useState<Embed[]>([]);
+  const collectionName =
+    category === "comics" && !grade
+      ? "comics"
+      : category === "presentations" && !grade
+      ? "presentations"
+      : category;
   const fetchEmbeds = async () => {
     const embedRef = collection(
       db,
       "embeds",
-      category,
-      grade || "presentations"
-    ); // Adjust for 'presentations' subcollection
+      collectionName,
+      grade || category
+    );
     const embedsQuery = query(embedRef);
 
     try {
@@ -100,7 +106,11 @@ const FetchEmbeds: React.FC<FetchEmbedsProps> = ({
               <Card key={index}>
                 <Link
                   href={`/${category}/${
-                    grade ? grade : "presentation"
+                    grade
+                      ? grade
+                      : category === "comics"
+                      ? "comic"
+                      : category === "presentations" && "presentation"
                   }/${encodeURIComponent(embed.title)}`}
                 >
                   <CardTitle className="text-center  m-5">
@@ -116,7 +126,6 @@ const FetchEmbeds: React.FC<FetchEmbedsProps> = ({
                     />
                   </CardContent>
                 </Link>
-                ~
                 {admin && (
                   <div className="text-center mt-2">
                     <button

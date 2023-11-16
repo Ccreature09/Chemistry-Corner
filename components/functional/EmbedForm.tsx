@@ -56,11 +56,18 @@ const EmbedForm: React.FC<EmbedFormProps> = ({ grade, category }) => {
   });
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (user) {
+      const collectionName =
+        category === "comics" && !grade
+          ? "comics"
+          : category === "presentations" && !grade
+          ? "presentations"
+          : category;
+
       const embedRef = collection(
         db,
         "embeds",
-        category,
-        grade || "presentations"
+        collectionName,
+        grade || category
       );
       addDoc(embedRef, {
         title: values.title,

@@ -44,6 +44,8 @@ export default function AdminDashboard() {
                 <TabsTrigger value="tests">Тестове</TabsTrigger>
                 <TabsTrigger value="games">Игри</TabsTrigger>
                 <TabsTrigger value="presentations">Презентации</TabsTrigger>
+                <TabsTrigger value="comics">Комикси</TabsTrigger>
+
                 <TabsTrigger value="settings">Настройки</TabsTrigger>
               </TabsList>
               <TabsContent value="Blog Moderation">
@@ -119,6 +121,11 @@ export default function AdminDashboard() {
                 <EmbedForm category="presentations"></EmbedForm>
 
                 <FetchEmbeds category="presentations" admin />
+              </TabsContent>
+              <TabsContent value="comics">
+                <EmbedForm category="comics"></EmbedForm>
+
+                <FetchEmbeds category="comics" admin />
               </TabsContent>
               <TabsContent value="settings"></TabsContent>
             </Tabs>
