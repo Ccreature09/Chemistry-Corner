@@ -40,6 +40,7 @@ export default function Page({ params }: { params: { id: string[] } }) {
   return (
     <>
       <Navbar />
+      <p className="text-center text-6xl font-bold my-3"></p>
       {embedData && (
         <div className="max-w-3xl mx-auto p-4">
           <h2 className="text-3xl text-center font-bold mb-4">{title}</h2>
