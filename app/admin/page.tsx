@@ -46,6 +46,10 @@ export default function AdminDashboard() {
                 <TabsTrigger value="games">Игри</TabsTrigger>
                 <TabsTrigger value="presentations">Презентации</TabsTrigger>
                 <TabsTrigger value="comics">Комикси</TabsTrigger>
+                <TabsTrigger value="useful-info">
+                  Полезна Информация
+                </TabsTrigger>
+
                 <TabsTrigger value="plans">Планове</TabsTrigger>
 
                 <TabsTrigger value="settings">Настройки</TabsTrigger>
@@ -128,6 +132,11 @@ export default function AdminDashboard() {
                 <EmbedForm category="comics"></EmbedForm>
 
                 <FetchEmbeds category="comics" admin />
+              </TabsContent>
+              <TabsContent value="useful-info">
+                <EmbedForm category="mindmaps"></EmbedForm>
+
+                <FetchEmbeds category="mindmaps" admin />
               </TabsContent>
               <TabsContent value="plans">
                 <PlanForm />

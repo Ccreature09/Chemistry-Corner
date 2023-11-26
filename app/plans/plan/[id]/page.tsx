@@ -65,7 +65,7 @@ export default function Page({ params }: { params: { id: string } }) {
     }, [slug]);
 
     return (
-      <div className="w-3/5 m-auto">
+      <div className=" lg:w-3/5 w-4/5 mx-auto mt-10">
         <Slider {...settings}>
           {pages.map((page, index) => (
             <div key={index}>
@@ -73,13 +73,13 @@ export default function Page({ params }: { params: { id: string } }) {
                 src={page.src}
                 alt={page.alt}
                 width={1000}
-                className="w-full"
-                height={0}
+                className="w-full shadow-xl"
+                height={1000}
               />
             </div>
           ))}
         </Slider>
-        <p className="text-center text-5xl my-10 ">
+        <p className="text-center text-5xl my-10 font-semibold ">
           Плъзни на ляво или на дясно
         </p>
       </div>

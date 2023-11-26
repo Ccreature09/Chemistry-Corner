@@ -20,7 +20,7 @@ interface Embed {
 
 interface FetchEmbedsProps {
   grade?: string;
-  category: string;
+  category: "games" | "tests" | "presentations" | "comics" | "mindmaps"; // Add "mindmaps" category
   admin?: boolean;
 }
 
@@ -35,16 +35,18 @@ const FetchEmbeds: React.FC<FetchEmbedsProps> = ({
       ? "comics"
       : category === "presentations" && !grade
       ? "presentations"
-      : category;
+      : category === "mindmaps" && !grade // Add condition for "mindmaps"
+      ? "mindmaps"
+      : category; // Default to the provided category
   const fetchEmbeds = async () => {
     const embedRef = collection(
       db,
       "embeds",
       collectionName,
-      grade || category
+      grade || (category == "mindmaps" && "mindmap") || category
     );
     const embedsQuery = query(embedRef);
-
+    console.log(embedRef);
     try {
       const querySnapshot = await getDocs(embedsQuery);
 
@@ -76,12 +78,14 @@ const FetchEmbeds: React.FC<FetchEmbedsProps> = ({
           ? "comics"
           : category === "presentations" && !grade
           ? "presentations"
+          : category === "mindmaps" && !grade // Add condition for "mindmaps"
+          ? "mindmaps"
           : category;
       const embedRef = collection(
         db,
         "embeds",
         collectionName,
-        grade || category
+        grade || (category == "mindmaps" && "mindmap") || category
       );
       const q = query(embedRef, where("title", "==", title));
 
@@ -110,12 +114,18 @@ const FetchEmbeds: React.FC<FetchEmbedsProps> = ({
           ? "Тестове за "
           : category === "presentations"
           ? "Презентации"
-          : category === "comics" && "Комикси"}
+          : category === "comics"
+          ? "Комикси"
+          : category === "mindmaps"
+          ? "Мисловни карти"
+          : ""}
         {grade && grade === "grade-8"
           ? "8 клас"
           : grade && grade === "grade-9"
           ? "9 клас"
-          : grade && grade === "grade-10" && "10 клас"}
+          : grade && grade === "grade-10"
+          ? "10 клас"
+          : ""}
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 m-10">
         {embeds.length > 0
@@ -127,10 +137,14 @@ const FetchEmbeds: React.FC<FetchEmbedsProps> = ({
                       ? grade
                       : category === "comics"
                       ? "comic"
-                      : category === "presentations" && "presentation"
+                      : category === "presentations"
+                      ? "presentation"
+                      : category === "mindmaps"
+                      ? "mindmap"
+                      : ""
                   }/${encodeURIComponent(embed.title)}`}
                 >
-                  <CardTitle className="text-center  m-5">
+                  <CardTitle className="text-center m-5">
                     {embed.title}
                   </CardTitle>
                   <CardContent>

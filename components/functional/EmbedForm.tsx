@@ -61,13 +61,15 @@ const EmbedForm: React.FC<EmbedFormProps> = ({ grade, category }) => {
           ? "comics"
           : category === "presentations" && !grade
           ? "presentations"
+          : category === "mindmaps" && !grade
+          ? "mindmaps"
           : category;
 
       const embedRef = collection(
         db,
         "embeds",
         collectionName,
-        grade || category
+        grade || (category === "mindmaps" && "mindmap") || category
       );
       addDoc(embedRef, {
         title: values.title,
