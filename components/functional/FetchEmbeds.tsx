@@ -78,7 +78,7 @@ const FetchEmbeds: React.FC<FetchEmbedsProps> = ({
           ? "comics"
           : category === "presentations" && !grade
           ? "presentations"
-          : category === "mindmaps" && !grade // Add condition for "mindmaps"
+          : category === "mindmaps" && !grade
           ? "mindmaps"
           : category;
       const embedRef = collection(
