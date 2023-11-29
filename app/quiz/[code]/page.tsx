@@ -15,7 +15,7 @@ import { Navbar } from "@/components/functional/navbar";
 import { Footer } from "@/components/functional/footer";
 import { Button } from "@/components/ui/button";
 import { onAuthStateChanged } from "firebase/auth";
-import next from "next";
+import { v4 as uuidv4 } from "uuid";
 interface Question {
   id: string;
   questionTitle: string;
@@ -68,6 +68,7 @@ export default function Page({ params }: { params: { code: string } }) {
   const [answersDisabled, setAnswersDisabled] = useState<boolean>(false);
 
   const [bonusPointsEnabled, setBonusPointsEnabled] = useState(true);
+  const [participantName, setParticipantName] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, function (user) {
@@ -78,7 +79,7 @@ export default function Page({ params }: { params: { code: string } }) {
       }
     });
     return () => unsubscribe();
-  });
+  }, []);
 
   useEffect(() => {
     async function fetchQuizAndQuestions() {
@@ -88,14 +89,23 @@ export default function Page({ params }: { params: { code: string } }) {
         where("quizCode", "==", Number(quizCode))
       );
       const quizSnapshot = await getDocs(quizQuery);
+
+      // Add console.log to check if the snapshot is being fired
+      console.log("Quiz Snapshot:", quizSnapshot);
+
       if (quizSnapshot.empty) {
         console.error("Quiz not found.");
         return;
       }
+
       const quizDoc = quizSnapshot.docs[0];
       const quizData = quizDoc.data();
       const questionsRef = collection(db, `quizzes/${quizDoc.id}/questions`);
       const questionsSnapshot = await getDocs(questionsRef);
+
+      // Add console.log to check if the snapshot is being fired
+      console.log("Questions Snapshot:", questionsSnapshot);
+
       const questionsData = questionsSnapshot.docs.map(function (doc) {
         const data = doc.data() as DocumentData;
         return {
@@ -128,28 +138,24 @@ export default function Page({ params }: { params: { code: string } }) {
 
     fetchQuizAndQuestions();
 
-    const quizzesRef = collection(db, "quizzes");
-    const quizQuery = query(
-      quizzesRef,
-      where("quizCode", "==", Number(quizCode))
-    );
-    const unsubscribe = onSnapshot(quizQuery, function (querySnapshot) {
-      querySnapshot.forEach(function (doc) {
-        if (doc.exists()) {
-          const quizData = doc.data();
-          const quizStarted = quizData.quizStarted;
-          if (quizStarted) {
-            // Quiz has started, hide the waiting lobby
-            setIsWaitingLobby(false);
-            // Set quizStarted to true when the quiz has started
-            setQuizStarted(true);
-          }
+    const unsubscribeParticipants = onSnapshot(
+      doc(db, "quizzes", quizCode), //This reference is wrong
+      (docSnapshot) => {
+        // Add console.log to check if the snapshot is being fired
+        console.log("Participants Snapshot:", docSnapshot);
+
+        const participants = docSnapshot.data()?.participants;
+        if (participants) {
+          const userNames = Object.values(participants).map(
+            (participant: any) => participant.name
+          );
+          setUsers(userNames);
         }
-      });
-    });
+      }
+    );
 
     return () => {
-      unsubscribe();
+      unsubscribeParticipants();
     };
   }, [quizCode]);
 
@@ -297,7 +303,122 @@ export default function Page({ params }: { params: { code: string } }) {
           points: userScore.points,
         };
       });
+
     setLeaderboard(topScores);
+
+    // Update the score for the participant with the entered name
+    updateParticipantScore(participantName, score);
+  }
+
+  useEffect(() => {
+    const unsubscribeQuiz = onSnapshot(
+      doc(db, "quizzes", quizCode), //also wrong reference
+      (docSnapshot) => {
+        const quizData = docSnapshot.data();
+        if (quizData) {
+          const isQuizStarted = quizData.quizStarted;
+
+          // Update local state based on the quizStarted field
+          if (isQuizStarted) {
+            setIsWaitingLobby(false);
+            setQuizStarted(true);
+          }
+        }
+      }
+    );
+
+    return () => {
+      unsubscribeQuiz();
+    };
+  }, [quizCode]);
+
+  const handleNameSubmit = async () => {
+    try {
+      // Generate a unique identifier for the participant
+      const participantId = uuidv4(); // You need to implement this function
+
+      // Add the participant's name to Firestore
+      const quizzesRef = collection(db, "quizzes");
+      const quizQuery = query(
+        quizzesRef,
+        where("quizCode", "==", Number(quizCode))
+      );
+      const quizSnapshot = await getDocs(quizQuery);
+
+      if (quizSnapshot.empty) {
+        console.error("Quiz not found.");
+        return;
+      }
+
+      const quizDoc = quizSnapshot.docs[0];
+      const quizDocRef = doc(db, "quizzes", quizDoc.id);
+
+      const participantMap = quizDoc.data()?.participants || {};
+
+      // Check if the participantId already exists in the map
+      if (!participantMap[participantId]) {
+        participantMap[participantId] = {
+          name: participantName,
+          points: 0,
+        };
+
+        // Add console.log to check the participantMap before the update
+        console.log("Participant Map Before Update:", participantMap);
+
+        await updateDoc(quizDocRef, {
+          participants: participantMap,
+        });
+
+        // Add console.log to check if the update was successful
+        console.log("Participant Map After Update:", participantMap);
+      }
+    } catch (error) {
+      console.error("Error updating participant name:", error);
+    }
+  };
+
+  async function updateParticipantScore(
+    participantName: string,
+    newScore: number
+  ) {
+    try {
+      const quizzesRef = collection(db, "quizzes");
+      const quizQuery = query(
+        quizzesRef,
+        where("quizCode", "==", Number(quizCode))
+      );
+      const quizSnapshot = await getDocs(quizQuery);
+      if (quizSnapshot.empty) {
+        console.error("Quiz not found.");
+        return;
+      }
+
+      const quizDoc = quizSnapshot.docs[0];
+      const quizDocRef = doc(db, "quizzes", quizDoc.id);
+
+      const participantMap = quizDoc.data()?.participants || {};
+
+      // Add console.log to check the participantMap before the update
+      console.log("Participant Map Before Update:", participantMap);
+
+      // Find the participant by name and update their score
+      const participantToUpdate = Object.values<UserScore>(participantMap).find(
+        (participant) => participant.name === participantName
+      ) as UserScore | undefined;
+
+      if (participantToUpdate) {
+        participantToUpdate.points = newScore;
+
+        await updateDoc(quizDocRef, {
+          participants: participantMap,
+        });
+
+        // Add console.log to check if the update was successful
+        console.log("Participant Map After Update:", participantMap);
+      }
+    } catch (error) {
+      console.error("Error updating participant score:", error);
+    }
   }
 
   return (
@@ -311,9 +432,29 @@ export default function Page({ params }: { params: { code: string } }) {
               <h2 className="text-4xl font-bold mb-5">
                 Waiting for the quiz to start...
               </h2>
-              {isAdmin && (
+              <div>
+                <h2 className="text-4xl font-bold mb-5">
+                  Welcome! Please enter your name to join the quiz.
+                </h2>
+                <div className="mb-4">
+                  <input
+                    type="text"
+                    value={participantName}
+                    onChange={(e) => setParticipantName(e.target.value)}
+                    placeholder="Enter your name"
+                    className="p-2 border rounded"
+                  />
+                </div>
                 <Button
                   className="bg-green-500 text-white py-2 px-4 rounded"
+                  onClick={handleNameSubmit}
+                >
+                  Join Quiz
+                </Button>
+              </div>
+              {isAdmin && (
+                <Button
+                  className="bg-green-500 text-white py-2 px-4 mt-5 rounded"
                   onClick={handleStartQuiz}
                 >
                   Start Quiz
