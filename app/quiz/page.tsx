@@ -1,48 +1,4 @@
 "use client";
-<<<<<<< HEAD
-import { Navbar } from "@/components/functional/navbar";
-import { Footer } from "@/components/functional/footer";
-import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-
-export default function Page() {
-  const [time, setTime] = useState(10);
-
-  useEffect(() => {
-    if (time > 0) {
-      const timerId = setTimeout(() => setTime(time - 1), 1000);
-
-      return () => clearTimeout(timerId);
-    }
-  }, [time]);
-
-  return (
-    <>
-      <Navbar></Navbar>
-      <div className="my-10">
-        <div className="w-96 h-44 flex justify-center items-center mx-auto my-6 p-10 bg-blue-300">
-          <p className="text-7xl text-white">{time}</p>
-        </div>
-        <div className="flex">
-          <p className="flex mx-auto">Колко е корен квадрат от 64</p>
-        </div>
-        <div className="flex mx-auto">
-          <div className="flex-col mx-auto">
-            <div className="flex mx-auto gap gap-5">
-              <Button className="w-64 h-32"> Answer 1</Button>
-              <Button className="w-64 h-32"> Answer 2</Button>
-            </div>
-            <div className="flex mx-auto mt-3 gap-5">
-              <Button className="w-64 h-32"> Answer 3</Button>
-
-              <Button className="w-64 h-32"> Answer 4</Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <Footer></Footer>
-=======
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { collection, query, where, getDocs } from "firebase/firestore";
@@ -93,7 +49,6 @@ export default function QuizLandingPage() {
         </form>
       </div>
       <Footer />
->>>>>>> d9928d422fe57ed97748885881bde8d6aa2f72d5
     </>
   );
 }
