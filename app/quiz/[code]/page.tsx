@@ -5,10 +5,11 @@ import {
   getDocs,
   query,
   where,
-  DocumentData,
+  getDoc,
   updateDoc,
   doc,
   onSnapshot,
+  Query,
 } from "firebase/firestore";
 import { auth, db } from "@/firebase/firebase";
 import { Navbar } from "@/components/functional/navbar";
@@ -16,6 +17,8 @@ import { Footer } from "@/components/functional/footer";
 import { Button } from "@/components/ui/button";
 import { onAuthStateChanged } from "firebase/auth";
 import { v4 as uuidv4 } from "uuid";
+import { DocumentData } from "firebase/firestore";
+import { useRouter } from "next/navigation";
 interface Question {
   id: string;
   questionTitle: string;
@@ -33,6 +36,11 @@ interface Quiz {
 }
 
 interface UserScore {
+  name: string;
+  points: number;
+}
+
+interface Participant {
   name: string;
   points: number;
 }
@@ -61,15 +69,18 @@ export default function Page({ params }: { params: { code: string } }) {
   const [leaderboard, setLeaderboard] = useState<UserScore[]>([]);
   const [isQuizEnded, setIsQuizEnded] = useState<boolean>(false);
   const [isWaitingLobby, setIsWaitingLobby] = useState<boolean>(true);
-  const [users, setUsers] = useState<string[]>([]);
+  const [participants, setParticipants] = useState<Participant[]>();
   const [isAdmin, setIsAdmin] = useState(false);
   const [quizStarted, setQuizStarted] = useState<boolean>(false);
   const [elapsedTime, setElapsedTime] = useState<number>(0);
   const [answersDisabled, setAnswersDisabled] = useState<boolean>(false);
-
+  const [isNameEntered, setIsNameEntered] = useState<boolean>(false);
+  const [initialQuizStarted, setInitialQuizStarted] = useState<boolean | null>(
+    null
+  );
   const [bonusPointsEnabled, setBonusPointsEnabled] = useState(true);
   const [participantName, setParticipantName] = useState("");
-
+  const router = useRouter();
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, function (user) {
       if (user && adminArray.includes(user.uid)) {
@@ -89,23 +100,21 @@ export default function Page({ params }: { params: { code: string } }) {
         where("quizCode", "==", Number(quizCode))
       );
       const quizSnapshot = await getDocs(quizQuery);
-
-      // Add console.log to check if the snapshot is being fired
-      console.log("Quiz Snapshot:", quizSnapshot);
-
       if (quizSnapshot.empty) {
         console.error("Quiz not found.");
         return;
       }
-
       const quizDoc = quizSnapshot.docs[0];
       const quizData = quizDoc.data();
+
+      if (quizData.quizStarted) {
+        console.error("Quiz has already started. Cannot join now.");
+        router.push("/quiz");
+        return;
+      }
+
       const questionsRef = collection(db, `quizzes/${quizDoc.id}/questions`);
       const questionsSnapshot = await getDocs(questionsRef);
-
-      // Add console.log to check if the snapshot is being fired
-      console.log("Questions Snapshot:", questionsSnapshot);
-
       const questionsData = questionsSnapshot.docs.map(function (doc) {
         const data = doc.data() as DocumentData;
         return {
@@ -123,41 +132,152 @@ export default function Page({ params }: { params: { code: string } }) {
       setCurrentQuestionId(questionsData[0]?.id);
       setNextQuestionId(questionsData[1]?.id || "End of Quiz");
 
-      // Get the participants from the quiz document
       const participants = quizData.participants;
       if (participants) {
-        // Extract the user names and add them to the users state
         const userNames = Object.values(participants).map(function (
           participant: any
         ) {
           return participant.name;
         });
-        setUsers(userNames);
+        setParticipants(userNames);
       }
     }
 
     fetchQuizAndQuestions();
 
-    const unsubscribeParticipants = onSnapshot(
-      doc(db, "quizzes", quizCode), //This reference is wrong
-      (docSnapshot) => {
-        // Add console.log to check if the snapshot is being fired
-        console.log("Participants Snapshot:", docSnapshot);
-
-        const participants = docSnapshot.data()?.participants;
-        if (participants) {
-          const userNames = Object.values(participants).map(
-            (participant: any) => participant.name
-          );
-          setUsers(userNames);
-        }
-      }
+    const quizzesRef = collection(db, "quizzes");
+    const quizQuery = query(
+      quizzesRef,
+      where("quizCode", "==", Number(quizCode))
     );
+    const unsubscribe = onSnapshot(quizQuery, function (querySnapshot) {
+      querySnapshot.forEach(function (doc) {
+        if (doc.exists()) {
+          const quizData = doc.data();
+          const quizStarted = quizData.quizStarted;
+          if (quizStarted) {
+            setIsWaitingLobby(false);
+            setQuizStarted(true);
+            setInitialQuizStarted(true);
+          } else {
+            setInitialQuizStarted(false);
+          }
+        }
+      });
+    });
 
     return () => {
-      unsubscribeParticipants();
+      unsubscribe();
     };
   }, [quizCode]);
+
+  useEffect(() => {
+    const quizzesRef = collection(db, "quizzes");
+    const quizQuery = query(
+      quizzesRef,
+      where("quizCode", "==", Number(quizCode))
+    );
+    const unsubscribe = onSnapshot(quizQuery, function (querySnapshot) {
+      querySnapshot.forEach(function (doc) {
+        if (doc.exists()) {
+          const quizData = doc.data();
+          const quizStarted = quizData.quizStarted;
+
+          if (initialQuizStarted === null) {
+            setInitialQuizStarted(quizStarted);
+          }
+
+          if (initialQuizStarted && !quizStarted) {
+            window.location.reload();
+          }
+        }
+      });
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [quizCode, initialQuizStarted]);
+
+  useEffect(() => {
+    const quizzesRef = collection(db, "quizzes");
+    const q = query(quizzesRef, where("quizCode", "==", Number(quizCode)));
+
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      if (querySnapshot.empty) {
+        console.error("Empty snapshot");
+        setParticipants([]);
+      } else {
+        const quizRef = doc(db, "quizzes", querySnapshot.docs[0].id);
+        const unsubscribe2 = onSnapshot(quizRef, (docSnapshot) => {
+          const data = docSnapshot.data();
+          const participantsObj: Record<string, Participant> =
+            data?.participants;
+
+          const participantsArray =
+            convertParticipantsMapToArray(participantsObj);
+          setParticipants(participantsArray);
+        });
+
+        return () => unsubscribe2();
+      }
+    });
+
+    return () => unsubscribe();
+  }, [quizCode, db]);
+  function convertParticipantsMapToArray(
+    participantsMap: Record<string, Participant> | undefined
+  ) {
+    if (!participantsMap) {
+      return [];
+    }
+
+    const participantsArray = Object.entries(participantsMap).map(
+      ([id, participant]) => ({
+        id,
+        name: participant.name,
+        points: participant.points,
+      })
+    );
+
+    return participantsArray;
+  }
+
+  useEffect(() => {
+    const fetchParticipants = async () => {
+      try {
+        const quizzesRef = collection(db, "quizzes");
+        const q = query(quizzesRef, where("quizCode", "==", Number(quizCode)));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+          console.error("Empty snapshot");
+          setParticipants([]);
+        } else {
+          const quizRef = doc(db, "quizzes", querySnapshot.docs[0].id);
+          const docSnapshot = await getDoc(quizRef);
+          const data = docSnapshot.data();
+          const participantsObj: Record<string, Participant> =
+            data?.participants;
+
+          const participantsArray =
+            convertParticipantsMapToArray(participantsObj);
+          setParticipants(participantsArray);
+        }
+      } catch (error) {
+        console.error("Error fetching participants:", error);
+      }
+    };
+
+    fetchParticipants();
+
+    return () => {
+      const quizzesRef = collection(db, "quizzes");
+      const q = query(quizzesRef, where("quizCode", "==", Number(quizCode)));
+      const unsubscribe = onSnapshot(q, () => {});
+      unsubscribe();
+    };
+  }, [quizCode, db]);
 
   const handleStartQuiz = async function () {
     try {
@@ -190,32 +310,29 @@ export default function Page({ params }: { params: { code: string } }) {
   useEffect(() => {
     if (quizStarted && time && time > 0 && !isQuizEnded) {
       const timerId = setTimeout(function () {
-        setTime(time - 1);
-        setElapsedTime(elapsedTime + 1);
+        setTime((prevTime) => (prevTime ? prevTime - 1 : 0));
+        setElapsedTime((prevElapsedTime) =>
+          prevElapsedTime ? prevElapsedTime + 1 : 1
+        );
       }, 1000);
       return () => clearTimeout(timerId);
     }
-    if (quizStarted && time === 0 && !showAnswer && !isQuizEnded) {
+    if (
+      quizStarted &&
+      time === 0 &&
+      !showAnswer &&
+      !isQuizEnded &&
+      currentQuiz
+    ) {
       setShowAnswer(true);
       setIntermissionTime(currentQuiz?.questionIntermission ?? 5);
-      if (
-        selectedAnswerIndex !== null &&
-        currentQuiz &&
-        currentQuestionIndex >= 0
-      ) {
-        const isCorrect =
-          selectedAnswerIndex ===
-          currentQuiz.questions[currentQuestionIndex].correctAnswer;
-        if (isCorrect) {
-          setScore(function (prevScore) {
-            return (
-              prevScore +
-              currentQuiz.questions[currentQuestionIndex].points +
-              (bonusPointsEnabled ? Math.max(0, 10 - elapsedTime) : 0)
-            );
-          });
-        }
-      }
+      setAnswersDisabled(true);
+
+      // Reset the timer for the next question
+      const nextQuestionTime =
+        currentQuiz?.questions[currentQuestionIndex]?.questionTime;
+      setTime(nextQuestionTime !== undefined ? nextQuestionTime : null);
+
       // Disable answers when the timer hits 0
       setAnswersDisabled(true);
     }
@@ -273,10 +390,22 @@ export default function Page({ params }: { params: { code: string } }) {
     answersDisabled, // Add answersDisabled as a dependency
   ]);
 
-  const handleAnswerClick = function (index: number) {
+  const handleAnswerClick = async function (index: number) {
     if (!isAnswered) {
       setSelectedAnswerIndex(index);
       setIsAnswered(true);
+
+      // Update the participant's score in Firestore
+      const newScore =
+        index === currentQuiz?.questions[currentQuestionIndex]?.correctAnswer
+          ? score +
+            currentQuiz.questions[currentQuestionIndex].points +
+            (bonusPointsEnabled ? Math.max(0, 10 - elapsedTime) : 0)
+          : score;
+
+      setScore(newScore);
+
+      updateParticipantScore(participantName, newScore);
     }
   };
 
@@ -310,34 +439,10 @@ export default function Page({ params }: { params: { code: string } }) {
     updateParticipantScore(participantName, score);
   }
 
-  useEffect(() => {
-    const unsubscribeQuiz = onSnapshot(
-      doc(db, "quizzes", quizCode), //also wrong reference
-      (docSnapshot) => {
-        const quizData = docSnapshot.data();
-        if (quizData) {
-          const isQuizStarted = quizData.quizStarted;
-
-          // Update local state based on the quizStarted field
-          if (isQuizStarted) {
-            setIsWaitingLobby(false);
-            setQuizStarted(true);
-          }
-        }
-      }
-    );
-
-    return () => {
-      unsubscribeQuiz();
-    };
-  }, [quizCode]);
-
   const handleNameSubmit = async () => {
     try {
-      // Generate a unique identifier for the participant
-      const participantId = uuidv4(); // You need to implement this function
+      const participantId = uuidv4();
 
-      // Add the participant's name to Firestore
       const quizzesRef = collection(db, "quizzes");
       const quizQuery = query(
         quizzesRef,
@@ -355,6 +460,13 @@ export default function Page({ params }: { params: { code: string } }) {
 
       const participantMap = quizDoc.data()?.participants || {};
 
+      // Check if the quiz has already started
+      const quizStarted = quizDoc.data()?.quizStarted;
+      if (quizStarted) {
+        console.error("Quiz has already started. Cannot join now.");
+        return;
+      }
+
       // Check if the participantId already exists in the map
       if (!participantMap[participantId]) {
         participantMap[participantId] = {
@@ -362,15 +474,10 @@ export default function Page({ params }: { params: { code: string } }) {
           points: 0,
         };
 
-        // Add console.log to check the participantMap before the update
-        console.log("Participant Map Before Update:", participantMap);
-
         await updateDoc(quizDocRef, {
           participants: participantMap,
         });
-
-        // Add console.log to check if the update was successful
-        console.log("Participant Map After Update:", participantMap);
+        setIsNameEntered(true);
       }
     } catch (error) {
       console.error("Error updating participant name:", error);
@@ -388,6 +495,7 @@ export default function Page({ params }: { params: { code: string } }) {
         where("quizCode", "==", Number(quizCode))
       );
       const quizSnapshot = await getDocs(quizQuery);
+
       if (quizSnapshot.empty) {
         console.error("Quiz not found.");
         return;
@@ -398,13 +506,10 @@ export default function Page({ params }: { params: { code: string } }) {
 
       const participantMap = quizDoc.data()?.participants || {};
 
-      // Add console.log to check the participantMap before the update
-      console.log("Participant Map Before Update:", participantMap);
-
       // Find the participant by name and update their score
       const participantToUpdate = Object.values<UserScore>(participantMap).find(
         (participant) => participant.name === participantName
-      ) as UserScore | undefined;
+      );
 
       if (participantToUpdate) {
         participantToUpdate.points = newScore;
@@ -412,14 +517,40 @@ export default function Page({ params }: { params: { code: string } }) {
         await updateDoc(quizDocRef, {
           participants: participantMap,
         });
-
-        // Add console.log to check if the update was successful
-        console.log("Participant Map After Update:", participantMap);
       }
     } catch (error) {
       console.error("Error updating participant score:", error);
     }
   }
+
+  const handleResetQuiz = async () => {
+    try {
+      // Reset the quiz in Firestore
+      const quizzesRef = collection(db, "quizzes");
+      const quizQuery = query(
+        quizzesRef,
+        where("quizCode", "==", Number(quizCode))
+      );
+      const quizSnapshot = await getDocs(quizQuery);
+
+      if (quizSnapshot.empty) {
+        console.error("Quiz not found.");
+        return;
+      }
+
+      const quizDoc = quizSnapshot.docs[0];
+      const quizDocRef = doc(db, "quizzes", quizDoc.id);
+
+      await updateDoc(quizDocRef, {
+        quizStarted: false,
+        participants: {},
+      });
+
+      window.location.reload();
+    } catch (error) {
+      console.error("Error resetting quiz:", error);
+    }
+  };
 
   return (
     <>
@@ -427,48 +558,56 @@ export default function Page({ params }: { params: { code: string } }) {
       <div className="flex flex-col justify-center items-center min-h-screen">
         <div className="text-center">
           {isWaitingLobby ? (
-            // Display waiting lobby content here
             <div>
-              <h2 className="text-4xl font-bold mb-5">
-                Waiting for the quiz to start...
-              </h2>
               <div>
-                <h2 className="text-4xl font-bold mb-5">
-                  Welcome! Please enter your name to join the quiz.
-                </h2>
-                <div className="mb-4">
-                  <input
-                    type="text"
-                    value={participantName}
-                    onChange={(e) => setParticipantName(e.target.value)}
-                    placeholder="Enter your name"
-                    className="p-2 border rounded"
-                  />
-                </div>
-                <Button
-                  className="bg-green-500 text-white py-2 px-4 rounded"
-                  onClick={handleNameSubmit}
-                >
-                  Join Quiz
-                </Button>
+                {!isNameEntered && (
+                  <div className="mb-4 ">
+                    <h1 className="font-bold text-7xl mb-4">
+                      {currentQuiz?.quizName}
+                    </h1>
+                    <h2 className="text-4xl font-semibold mb-5">
+                      Welcome! Please enter your name to join the quiz.
+                    </h2>
+                    <input
+                      type="text"
+                      value={participantName}
+                      onChange={(e) => setParticipantName(e.target.value)}
+                      placeholder="Enter your name"
+                      className="p-2 border rounded"
+                    />
+                  </div>
+                )}
+                {!isNameEntered && participantName && (
+                  <Button
+                    className="bg-green-500 text-white py-2 px-4 rounded"
+                    onClick={handleNameSubmit}
+                  >
+                    Join Quiz
+                  </Button>
+                )}
+                {isAdmin && !isQuizEnded && !quizStarted && isNameEntered && (
+                  <>
+                    <h2 className="text-4xl font-bold mb-5">
+                      Waiting for the quiz to start...
+                    </h2>
+                    <Button
+                      className="bg-green-500 text-white py-2 px-4 mt-5 rounded"
+                      onClick={handleStartQuiz}
+                    >
+                      Start Quiz
+                    </Button>
+                  </>
+                )}
               </div>
-              {isAdmin && (
-                <Button
-                  className="bg-green-500 text-white py-2 px-4 mt-5 rounded"
-                  onClick={handleStartQuiz}
-                >
-                  Start Quiz
-                </Button>
-              )}
               <h3 className="text-2xl font-bold mt-5">Users:</h3>
               <ul className="text-xl">
-                {users.map(function (user, index) {
-                  return <li key={index}>{user}</li>;
-                })}
+                {participants &&
+                  participants.map((participant, index) => (
+                    <li key={index}>{participant.name}</li>
+                  ))}
               </ul>
             </div>
           ) : (
-            // Display quiz content here
             <>
               {/* Question Timer */}
               {time !== null && !showAnswer && !isQuizEnded && (
@@ -512,7 +651,7 @@ export default function Page({ params }: { params: { code: string } }) {
                                 : "bg-blue-500 hover:bg-blue-700"
                             } text-white font-bold py-2 px-4 rounded`}
                             onClick={() => handleAnswerClick(index)}
-                            disabled={isAnswered || answersDisabled} // Disable the button based on answersDisabled
+                            disabled={isAnswered || answersDisabled}
                           >
                             {answer}
                           </Button>
@@ -530,6 +669,11 @@ export default function Page({ params }: { params: { code: string } }) {
                                 .correctAnswer
                             ]
                           }
+                          <div className="text-center">
+                            <h3 className="text-3xl font-bold">
+                              Score: {score}
+                            </h3>
+                          </div>
                         </div>
                       )}
                   </div>
@@ -537,10 +681,7 @@ export default function Page({ params }: { params: { code: string } }) {
             </>
           )}
         </div>
-        {/* Score Display */}
-        <div className="text-center">
-          <h3 className="text-3xl font-bold">Score: {score}</h3>
-        </div>
+
         {/* Leaderboard Display */}
         {isQuizEnded && (
           <div className="text-center mt-8">
@@ -554,6 +695,15 @@ export default function Page({ params }: { params: { code: string } }) {
                 );
               })}
             </ol>
+
+            {isAdmin && (
+              <Button
+                className="bg-red-500 text-white py-2 px-4 mt-5 rounded"
+                onClick={handleResetQuiz}
+              >
+                Reset Quiz
+              </Button>
+            )}
           </div>
         )}
       </div>
