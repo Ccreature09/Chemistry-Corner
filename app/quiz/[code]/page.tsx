@@ -9,7 +9,6 @@ import {
   updateDoc,
   doc,
   onSnapshot,
-  Query,
 } from "firebase/firestore";
 import { auth, db } from "@/firebase/firebase";
 import { Navbar } from "@/components/functional/navbar";
@@ -24,7 +23,7 @@ interface Question {
   questionTitle: string;
   answers: string[];
   correctAnswer: number;
-  points: number;
+  questionPoints: number;
   possibleAnswers: number;
   questionTime: number;
 }
@@ -101,14 +100,13 @@ export default function Page({ params }: { params: { code: string } }) {
       );
       const quizSnapshot = await getDocs(quizQuery);
       if (quizSnapshot.empty) {
-        console.error("Quiz not found.");
+        router.push("/quiz");
         return;
       }
       const quizDoc = quizSnapshot.docs[0];
       const quizData = quizDoc.data();
 
       if (quizData.quizStarted) {
-        console.error("Quiz has already started. Cannot join now.");
         router.push("/quiz");
         return;
       }
@@ -399,12 +397,11 @@ export default function Page({ params }: { params: { code: string } }) {
       const newScore =
         index === currentQuiz?.questions[currentQuestionIndex]?.correctAnswer
           ? score +
-            currentQuiz.questions[currentQuestionIndex].points +
+            currentQuiz.questions[currentQuestionIndex].questionPoints +
             (bonusPointsEnabled ? Math.max(0, 10 - elapsedTime) : 0)
           : score;
 
       setScore(newScore);
-
       updateParticipantScore(participantName, newScore);
     }
   };
@@ -435,7 +432,6 @@ export default function Page({ params }: { params: { code: string } }) {
 
     setLeaderboard(topScores);
 
-    // Update the score for the participant with the entered name
     updateParticipantScore(participantName, score);
   }
 
@@ -555,17 +551,17 @@ export default function Page({ params }: { params: { code: string } }) {
   return (
     <>
       <Navbar />
-      <div className="flex flex-col justify-center items-center min-h-screen">
+      <div className="flex flex-col justify-center items-center min-h-screen max-w-screen-lg mx-auto">
         <div className="text-center">
           {isWaitingLobby ? (
             <div>
               <div>
                 {!isNameEntered && (
                   <div className="mb-4 ">
-                    <h1 className="font-bold text-7xl mb-4">
+                    <h1 className="font-bold text-4xl md:text-7xl mb-4">
                       {currentQuiz?.quizName}
                     </h1>
-                    <h2 className="text-4xl font-semibold mb-5">
+                    <h2 className="text-xl md:text-4xl font-semibold mb-5">
                       Welcome! Please enter your name to join the quiz.
                     </h2>
                     <input
@@ -579,7 +575,7 @@ export default function Page({ params }: { params: { code: string } }) {
                 )}
                 {!isNameEntered && participantName && (
                   <Button
-                    className="bg-green-500 text-white py-2 px-4 rounded"
+                    className="bg-green-500 text-white py-2 px-4 rounded md:py-3 md:px-6"
                     onClick={handleNameSubmit}
                   >
                     Join Quiz
@@ -599,8 +595,8 @@ export default function Page({ params }: { params: { code: string } }) {
                   </>
                 )}
               </div>
-              <h3 className="text-2xl font-bold mt-5">Users:</h3>
-              <ul className="text-xl">
+              <h3 className="text-xl md:text-2xl font-bold mt-5">Users:</h3>
+              <ul className="text-base md:text-xl">
                 {participants &&
                   participants.map((participant, index) => (
                     <li key={index}>{participant.name}</li>
@@ -611,8 +607,8 @@ export default function Page({ params }: { params: { code: string } }) {
             <>
               {/* Question Timer */}
               {time !== null && !showAnswer && !isQuizEnded && (
-                <div className="flex justify-center items-center bg-blue-300 w-20 h-20 rounded-full mx-auto my-10">
-                  <p className="text-5xl text-white">{time}</p>
+                <div className="flex justify-center items-center bg-blue-300 w-16 h-16 rounded-full mx-auto my-5 md:w-20 md:h-20">
+                  <p className="text-base md:text-5xl text-white">{time}</p>
                 </div>
               )}
               {/* Intermission Timer */}
@@ -628,20 +624,20 @@ export default function Page({ params }: { params: { code: string } }) {
                 currentQuiz &&
                 currentQuiz.questions[currentQuestionIndex] && (
                   <div>
-                    <h2 className="text-6xl font-bold mb-5">
+                    <h2 className="text-4xl md:text-6xl font-bold mb-5">
                       {
                         currentQuiz.questions[currentQuestionIndex]
                           .questionTitle
                       }
                     </h2>
-                    <div className="grid grid-cols-2 gap-4 mb-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
                       {currentQuiz?.questions[
                         currentQuestionIndex
                       ]?.answers.map(function (answer, index) {
                         return (
                           <Button
                             key={index}
-                            className={`w-64 h-16 text-xl ${
+                            className={`text-white font-bold py-2 px-4 rounded w-full h-16 md:h-auto text-base md:text-xl ${
                               index ===
                                 currentQuiz?.questions[currentQuestionIndex]
                                   ?.correctAnswer && showAnswer
@@ -649,7 +645,7 @@ export default function Page({ params }: { params: { code: string } }) {
                                 : selectedAnswerIndex === index
                                 ? "bg-yellow-500"
                                 : "bg-blue-500 hover:bg-blue-700"
-                            } text-white font-bold py-2 px-4 rounded`}
+                            } `}
                             onClick={() => handleAnswerClick(index)}
                             disabled={isAnswered || answersDisabled}
                           >

@@ -1,299 +1,321 @@
-// QuizForm.js
-import React, { useState, useEffect } from "react";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
-import { Button } from "../ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-  DialogClose,
-} from "@/components/ui/dialog";
-import { User, onAuthStateChanged } from "firebase/auth";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { addDoc, collection } from "firebase/firestore";
-import { db, auth } from "@/firebase/firebase";
+import { db } from "@/firebase/firebase";
+import { collection, addDoc } from "firebase/firestore";
+import React from "react";
+interface Answer {
+  answer: string;
+  [key: string]: any;
+}
 
-const formSchema = z.object({
-  quizName: z.string(),
-  quizIntermission: z.number(),
-  quizCode: z.string(),
-  questions: z.array(
-    z.object({
-      question: z.string(),
-      answers: z.array(z.string()),
-      correctAnswer: z.number(),
-      points: z.number(),
-      questionTime: z.number(),
-    })
-  ),
-});
+interface Question {
+  questionTitle: string;
+  questionTime: number;
+  questionPoints: number;
+  answers: Answer[];
+  correctAnswer: number;
+  [key: string]: any;
+}
 
-const QuizForm: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
+interface Quiz {
+  quizName: string;
+  questionIntermission: number;
+  quizCode: number;
+  questions: Question[];
+  [key: string]: any;
+}
 
-  useEffect(() => {
-    onAuthStateChanged(auth, (user: User | null) => {
-      if (user) {
-        setUser(user);
-      } else {
-        setUser(null);
-      }
-    });
-  }, []);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      quizName: "",
-      quizIntermission: 0,
-      quizCode: "",
-      questions: [
-        {
-          question: "",
-          answers: ["", ""],
-          correctAnswer: 0,
-          points: 0,
-          questionTime: 0,
-        },
-      ],
-    },
+const DynamicForm: React.FC = () => {
+  const [currentQuiz, setCurrentQuiz] = React.useState<Quiz>({
+    quizName: "",
+    questionIntermission: 0,
+    quizCode: 0,
+    questions: [
+      {
+        questionTitle: "",
+        questionTime: 0,
+        questionPoints: 0,
+        answers: [{ answer: "" }],
+        correctAnswer: 0,
+      },
+    ],
   });
 
-  const handleAddQuestion = () => {
-    form.setValue("questions", [
-      ...form.getValues().questions,
-      {
-        question: "",
-        answers: ["", ""],
-        correctAnswer: 0,
-        points: 0,
-        questionTime: 0,
-      },
-    ]);
+  const addQuestionRow = () => {
+    let updatedQuiz = { ...currentQuiz };
+    updatedQuiz.questions.push({
+      questionTitle: "",
+      questionTime: 0,
+      questionPoints: 0,
+      answers: [{ answer: "" }],
+      correctAnswer: 0,
+    });
+    setCurrentQuiz(updatedQuiz);
   };
 
-  const handleQuestionChange = (index: number, field: string, value: any) => {
-    const updatedQuestions = [...form.getValues().questions];
-    updatedQuestions[index][field] = value;
-    form.setValue("questions", updatedQuestions);
+  const removeQuestionRow = (questionIndex: number) => {
+    let updatedQuiz = { ...currentQuiz };
+    updatedQuiz.questions.splice(questionIndex, 1);
+    setCurrentQuiz(updatedQuiz);
   };
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {};
+  const addAnswerRow = (questionIndex: number) => {
+    let updatedQuiz = { ...currentQuiz };
+    updatedQuiz.questions[questionIndex].answers.push({
+      answer: "",
+    });
+    setCurrentQuiz(updatedQuiz);
+  };
+
+  const removeAnswerRow = (questionIndex: number, answerIndex: number) => {
+    let updatedQuiz = { ...currentQuiz };
+    updatedQuiz.questions[questionIndex].answers.splice(answerIndex, 1);
+    setCurrentQuiz(updatedQuiz);
+  };
+
+  const handleQuizChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrentQuiz({
+      ...currentQuiz,
+      [event.target.name]:
+        event.target.type === "number"
+          ? +event.target.value
+          : event.target.value,
+    });
+  };
+
+  const handleQuestionChange = (
+    questionIndex: number,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    let updatedQuiz = { ...currentQuiz };
+    updatedQuiz.questions[questionIndex][event.target.name] =
+      event.target.type === "number" ? +event.target.value : event.target.value;
+    setCurrentQuiz(updatedQuiz);
+  };
+
+  const handleAnswerChange = (
+    questionIndex: number,
+    answerIndex: number,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    let updatedQuiz = { ...currentQuiz };
+    updatedQuiz.questions[questionIndex].answers[answerIndex][
+      event.target.name
+    ] = event.target.value;
+    setCurrentQuiz(updatedQuiz);
+  };
+
+  const handleCorrectAnswerChange = (
+    questionIndex: number,
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    let updatedQuiz = { ...currentQuiz };
+    updatedQuiz.questions[questionIndex].correctAnswer = parseInt(
+      event.target.value,
+      10
+    );
+    setCurrentQuiz(updatedQuiz);
+  };
+
+  const saveQuizData = async () => {
+    try {
+      const quizRef = await addDoc(collection(db, "quizzes"), {
+        quizName: currentQuiz.quizName,
+        quizCode: currentQuiz.quizCode,
+        questionIntermission: currentQuiz.questionIntermission,
+        quizStarted: false,
+      });
+
+      const quizId = quizRef.id;
+
+      for (const question of currentQuiz.questions) {
+        await addDoc(collection(db, `quizzes/${quizId}/questions`), {
+          questionTitle: question.questionTitle,
+          questionTime: question.questionTime,
+          possibleAnswers: question.answers.length,
+          answers: question.answers.map((answer) => answer.answer),
+          correctAnswer: question.correctAnswer,
+          questionPoints: question.questionPoints,
+        });
+      }
+
+      alert("Quiz data saved successfully");
+      resetForm();
+    } catch (error) {
+      console.error("Error saving quiz data: ", error);
+      alert("Error saving quiz data. Please try again.");
+    }
+  };
+  const resetForm = () => {
+    setCurrentQuiz({
+      quizName: "",
+      questionIntermission: 0,
+      quizCode: 0,
+      questions: [
+        {
+          questionTitle: "",
+          questionTime: 0,
+          questionPoints: 0,
+          answers: [{ answer: "" }],
+          correctAnswer: 0,
+        },
+      ],
+    });
+  };
 
   return (
-    <>
-      <Dialog>
-        <DialogTrigger className="dark:bg-white mb-5 dark:text-black text-sm text-white bg-slate-900 dark:hover:bg-slate-50/90 hover:bg-slate-900/90 w-full py-2 rounded-md">
-          Create Quiz
-        </DialogTrigger>
-
-        <DialogContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <div className="flex flex-col gap-3 ">
-                <FormField
-                  control={form.control}
-                  name="quizName"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>Quiz Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Quiz Name"
-                          {...field}
-                          className="w-full p-2 rounded border"
-                        />
-                      </FormControl>
-
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="quizIntermission"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>Quiz Intermission Time</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="Intermission Time"
-                          {...field}
-                          className="w-full p-2 rounded border"
-                        />
-                      </FormControl>
-
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="quizCode"
-                  render={({ field }) => (
-                    <FormItem className="w-full">
-                      <FormLabel>Quiz Code</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Quiz Code"
-                          {...field}
-                          className="w-full p-2 rounded border"
-                        />
-                      </FormControl>
-
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {form.getValues().questions.map((question, index) => (
-                  <div key={index}>
-                    <h3>Question {index + 1}</h3>
-                    <FormField
-                      control={form.control}
-                      name={`questions[${index}].question`}
-                      render={({ field }) => (
-                        <FormItem className="w-full">
-                          <FormLabel>Question</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Question"
-                              {...field}
-                              className="w-full p-2 rounded border"
-                            />
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name={`questions[${index}].answers`}
-                      render={({ field }) => (
-                        <FormItem className="w-full">
-                          <FormLabel>Answers</FormLabel>
-                          <FormControl>
-                            {question.answers.map((answer, answerIndex) => (
-                              <div key={answerIndex}>
-                                <Input
-                                  placeholder={`Answer ${answerIndex + 1}`}
-                                  {...field}
-                                  className="w-full p-2 rounded border"
-                                />
-                              </div>
-                            ))}
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name={`questions[${index}].correctAnswer`}
-                      render={({ field }) => (
-                        <FormItem className="w-full">
-                          <FormLabel>Correct Answer</FormLabel>
-                          <FormControl>
-                            <select
-                              {...field}
-                              className="w-full p-2 rounded border"
-                            >
-                              {question.answers.map((_, answerIndex) => (
-                                <option
-                                  key={answerIndex}
-                                  value={answerIndex}
-                                >{`Option ${answerIndex + 1}`}</option>
-                              ))}
-                            </select>
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name={`questions[${index}].points`}
-                      render={({ field }) => (
-                        <FormItem className="w-full">
-                          <FormLabel>Points</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="Points"
-                              {...field}
-                              className="w-full p-2 rounded border"
-                            />
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name={`questions[${index}].questionTime`}
-                      render={({ field }) => (
-                        <FormItem className="w-full">
-                          <FormLabel>Question Time</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="Question Time"
-                              {...field}
-                              className="w-full p-2 rounded border"
-                            />
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                ))}
-
-                <Button
-                  type="button"
-                  onClick={handleAddQuestion}
-                  className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-700"
+    <div className="container mx-auto my-10 p-6 bg-gray-100 shadow-md">
+      <div className="mb-8 p-4 border rounded">
+        <div className="mb-4">
+          <label htmlFor="quizName" className="block font-bold mb-2">
+            Quiz Name
+          </label>
+          <input
+            name="quizName"
+            value={currentQuiz.quizName}
+            type="text"
+            onChange={(e) => handleQuizChange(e)}
+            className="w-full border p-2"
+          />
+        </div>
+        <div className="mb-4">
+          <label
+            htmlFor="questionIntermission"
+            className="block font-bold mb-2"
+          >
+            Question Intermission
+          </label>
+          <input
+            name="questionIntermission"
+            value={currentQuiz.questionIntermission}
+            type="number"
+            onChange={(e) => handleQuizChange(e)}
+            className="w-full border p-2"
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="quizCode" className="block font-bold mb-2">
+            Quiz Code
+          </label>
+          <input
+            name="quizCode"
+            value={currentQuiz.quizCode}
+            type="number"
+            onChange={(e) => handleQuizChange(e)}
+            className="w-full border p-2"
+          />
+        </div>
+        {currentQuiz.questions.map((question, questionIndex) => (
+          <div key={questionIndex} className="mb-4">
+            <label
+              htmlFor={`questionTitle-${questionIndex}`} // Updated id
+              className="block font-bold mb-2"
+            >
+              Question Title
+            </label>
+            <input
+              name="questionTitle"
+              value={currentQuiz.questions[questionIndex].questionTitle}
+              type="text"
+              onChange={(e) => handleQuestionChange(questionIndex, e)}
+              className="w-full border p-2"
+            />
+            <label
+              htmlFor={`questionTime-${questionIndex}`} // Updated id
+              className="block font-bold mb-2"
+            >
+              Question Time
+            </label>
+            <input
+              name="questionTime"
+              value={currentQuiz.questions[questionIndex].questionTime}
+              type="number"
+              onChange={(e) => handleQuestionChange(questionIndex, e)}
+              className="w-full border p-2"
+            />
+            <label
+              htmlFor={`questionPoints-${questionIndex}`} // Updated id
+              className="block font-bold mb-2"
+            >
+              Question Points
+            </label>
+            <input
+              name="questionPoints"
+              value={currentQuiz.questions[questionIndex].questionPoints}
+              type="number"
+              onChange={(e) => handleQuestionChange(questionIndex, e)}
+              className="w-full border p-2"
+            />
+            {question.answers.map((answer, answerIndex) => (
+              <div key={answerIndex} className="flex items-center mb-2">
+                <label
+                  htmlFor={`answer-${questionIndex}-${answerIndex}`}
+                  className="block font-bold mr-2"
                 >
-                  Add Question
-                </Button>
+                  Answer
+                </label>
+                <input
+                  name="answer"
+                  type="text"
+                  onChange={(e) =>
+                    handleAnswerChange(questionIndex, answerIndex, e)
+                  }
+                  className="w-full border p-2"
+                />
+                <button
+                  onClick={() => removeAnswerRow(questionIndex, answerIndex)}
+                  className="ml-2 bg-red-500 text-white px-2 py-1 rounded"
+                >
+                  -
+                </button>
               </div>
-            </form>
-            <DialogClose asChild>
-              <Button
-                type="submit"
-                className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-700"
-              >
-                Submit Quiz
-              </Button>
-            </DialogClose>
-          </Form>
-        </DialogContent>
-      </Dialog>
-    </>
+            ))}
+            <label
+              htmlFor={`correct-answer-${questionIndex}`}
+              className="block font-bold mb-2"
+            >
+              Correct Answer
+            </label>
+            <select
+              name="correctAnswer"
+              value={currentQuiz.questions[questionIndex].correctAnswer}
+              onChange={(e) => handleCorrectAnswerChange(questionIndex, e)}
+              className="w-full border p-2"
+            >
+              {question.answers.map((_, index) => (
+                <option key={index} value={index}>
+                  {index + 1}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={() => addAnswerRow(questionIndex)}
+              className="bg-green-500 text-white px-2 py-1 rounded"
+            >
+              Add Answer
+            </button>
+            <button
+              onClick={() => removeQuestionRow(questionIndex)}
+              className="ml-2 bg-red-500 text-white px-2 py-1 rounded"
+            >
+              Remove Question
+            </button>
+          </div>
+        ))}
+        <button
+          onClick={() => addQuestionRow()}
+          className="bg-blue-500 text-white px-2 py-1 rounded"
+        >
+          Add Question
+        </button>
+      </div>
+
+      <button
+        onClick={saveQuizData}
+        className="bg-purple-500 text-white px-4 py-2 rounded"
+      >
+        Save Quiz Data
+      </button>
+    </div>
   );
 };
 
-export default QuizForm;
+export default DynamicForm;
