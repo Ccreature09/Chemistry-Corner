@@ -10,6 +10,7 @@ import { Blogmod } from "@/components/functional/blogmod";
 import EmbedForm from "@/components/functional/EmbedForm";
 import FetchEmbeds from "@/components/functional/FetchEmbeds";
 import PlanForm from "@/components/functional/planform";
+import QuizForm from "@/components/functional/quizform";
 export default function AdminDashboard() {
   const router = useRouter();
 
@@ -51,6 +52,7 @@ export default function AdminDashboard() {
                 </TabsTrigger>
 
                 <TabsTrigger value="plans">Планове</TabsTrigger>
+                <TabsTrigger value="quizzes">Quizzes</TabsTrigger>
 
                 <TabsTrigger value="settings">Настройки</TabsTrigger>
               </TabsList>
@@ -140,6 +142,9 @@ export default function AdminDashboard() {
               </TabsContent>
               <TabsContent value="plans">
                 <PlanForm />
+              </TabsContent>
+              <TabsContent value="quizzes">
+                <QuizForm />
               </TabsContent>
               <TabsContent value="settings"></TabsContent>
             </Tabs>
