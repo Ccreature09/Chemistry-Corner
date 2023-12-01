@@ -623,21 +623,21 @@ export default function Page({ params }: { params: { code: string } }) {
               {!isQuizEnded &&
                 currentQuiz &&
                 currentQuiz.questions[currentQuestionIndex] && (
-                  <div>
+                  <div className="w-full">
                     <h2 className="text-4xl md:text-6xl font-bold mb-5">
                       {
                         currentQuiz.questions[currentQuestionIndex]
                           .questionTitle
                       }
                     </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 w-full gap-4 mb-10">
                       {currentQuiz?.questions[
                         currentQuestionIndex
                       ]?.answers.map(function (answer, index) {
                         return (
                           <Button
                             key={index}
-                            className={`text-white font-bold py-2 px-4 rounded w-full h-16 md:h-auto text-base md:text-xl ${
+                            className={`w-full h-32 py-2 px-36 rounded text-xl text-white font-bold ${
                               index ===
                                 currentQuiz?.questions[currentQuestionIndex]
                                   ?.correctAnswer && showAnswer
@@ -657,7 +657,7 @@ export default function Page({ params }: { params: { code: string } }) {
                     {currentQuiz &&
                       currentQuiz.questions[currentQuestionIndex] &&
                       showAnswer && (
-                        <div className="text-green-500 text-4xl">
+                        <div className="text-green-500 text-4xl w-full">
                           Correct Answer:{" "}
                           {
                             currentQuiz.questions[currentQuestionIndex].answers[
