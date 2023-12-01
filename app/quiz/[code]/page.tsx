@@ -18,6 +18,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { v4 as uuidv4 } from "uuid";
 import { DocumentData } from "firebase/firestore";
 import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
 interface Question {
   id: string;
   questionTitle: string;
@@ -422,7 +423,7 @@ export default function Page({ params }: { params: { code: string } }) {
       .sort(function (a, b) {
         return b.points - a.points;
       })
-      .slice(0, 3)
+
       .map(function (userScore) {
         return {
           name: userScore.name,
@@ -554,17 +555,18 @@ export default function Page({ params }: { params: { code: string } }) {
       <div className="flex flex-col justify-center items-center min-h-screen max-w-screen-lg mx-auto">
         <div className="text-center">
           {isWaitingLobby ? (
-            <div>
+            <div className="shadow-xl p-5 rounded-lg mx-5">
               <div>
                 {!isNameEntered && (
                   <div className="mb-4 ">
-                    <h1 className="font-bold text-4xl md:text-7xl mb-4">
+                    <h1 className="font-bold text-6xl md:text-7xl mb-8">
                       {currentQuiz?.quizName}
                     </h1>
-                    <h2 className="text-xl md:text-4xl font-semibold mb-5">
-                      Welcome! Please enter your name to join the quiz.
+
+                    <h2 className="text-xl md:text-4xl font-semibold mb-8">
+                      Въведи име за да участваш в играта!
                     </h2>
-                    <input
+                    <Input
                       type="text"
                       value={participantName}
                       onChange={(e) => setParticipantName(e.target.value)}
@@ -583,8 +585,8 @@ export default function Page({ params }: { params: { code: string } }) {
                 )}
                 {isAdmin && !isQuizEnded && !quizStarted && isNameEntered && (
                   <>
-                    <h2 className="text-4xl font-bold mb-5">
-                      Waiting for the quiz to start...
+                    <h2 className="text-4xl mx-5 font-bold my-5">
+                      Изчакваме учител да започне Quiz-a...
                     </h2>
                     <Button
                       className="bg-green-500 text-white py-2 px-4 mt-5 rounded"
@@ -595,8 +597,10 @@ export default function Page({ params }: { params: { code: string } }) {
                   </>
                 )}
               </div>
-              <h3 className="text-xl md:text-2xl font-bold mt-5">Users:</h3>
-              <ul className="text-base md:text-xl">
+              <h3 className="text-2xl md:text-32xl font-bold underline mt-5">
+                Участници:
+              </h3>
+              <ul className="text-xl md:text-2xl shadow-xl p-5 rounded-lg">
                 {participants &&
                   participants.map((participant, index) => (
                     <li key={index}>{participant.name}</li>
@@ -680,17 +684,66 @@ export default function Page({ params }: { params: { code: string } }) {
 
         {/* Leaderboard Display */}
         {isQuizEnded && (
-          <div className="text-center mt-8">
-            <h2 className="text-4xl font-bold mb-4">Leaderboard</h2>
-            <ol>
-              {leaderboard.map(function (user, index) {
-                return (
-                  <li key={index}>
-                    {user.name}: {user.points} points
-                  </li>
-                );
-              })}
-            </ol>
+          <div className="text-center w-3/5">
+            <h2 className="text-7xl font-bold mb-32">Leaderboard</h2>
+            <div className="flex gap-2">
+              {/* Display Podium - Silver, Gold, Bronze */}
+              {leaderboard.length >= 2 && (
+                <div className="w-1/3 h-[300px] mt-[100px] bg-slate-400 text-white pt-5">
+                  <p className="text-3xl m-2 font-bold">2</p>
+                  <p className="text-4xl font-semibold mx-1 break-words">
+                    {leaderboard[1].name}
+                  </p>
+                  <p className="text-2xl mt-4">
+                    {leaderboard[1].points} points
+                  </p>
+                </div>
+              )}
+
+              {leaderboard.length >= 1 && (
+                <div className="w-1/3 h-[400px] bg-yellow-300 text-white pt-5">
+                  <p className="text-3xl m-2 font-bold">1</p>
+                  <p className="text-4xl font-semibold break-words">
+                    {leaderboard[0].name}
+                  </p>
+                  <p className="text-2xl mt-4">
+                    {leaderboard[0].points} points
+                  </p>
+                </div>
+              )}
+
+              {leaderboard.length >= 3 && (
+                <div className="w-1/3 h-[200px] mt-[200px] bg-orange-400 text-white pt-5">
+                  <p className="text-3xl m-2 font-bold">1</p>
+                  <p className="text-4xl font-semibold break-words">
+                    {leaderboard[2].name}
+                  </p>
+                  <p className="text-2xl mt-4">
+                    {leaderboard[2].points} points
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="mt-5">
+              <table className="table-auto w-full">
+                <thead>
+                  <tr>
+                    <th className="px-4 py-2">#</th>
+                    <th className="px-4 py-2">Name</th>
+                    <th className="px-4 py-2">Points</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leaderboard.slice(3).map((user, index) => (
+                    <tr key={index}>
+                      <td className="border px-4 py-2">{index + 4}</td>
+                      <td className="border px-4 py-2">{user.name}</td>
+                      <td className="border px-4 py-2">{user.points}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
             {isAdmin && (
               <Button

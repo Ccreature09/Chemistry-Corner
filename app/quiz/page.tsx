@@ -35,17 +35,18 @@ export default function QuizLandingPage() {
   return (
     <>
       <Navbar />
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-        <h1 className="mb-5 font-bold text-4xl">
-          Welcome! Enter a Quiz Code to get started!
+      <div className="flex flex-col items-center justify-center min-h-screen mx-3 ">
+        <h1 className="mb-5 font-bold text-4xl text-center">
+          Въведете Quiz Code!
         </h1>
+
         <form
           onSubmit={handleSubmit}
-          className="bg-white p-8 rounded-lg shadow-md max-w-md w-full"
+          className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full"
         >
           <Input
             type="text"
-            placeholder="Enter quiz code"
+            placeholder="Quiz Code"
             value={quizCode}
             onChange={(e) => setQuizCode(e.target.value)}
             required
@@ -55,7 +56,7 @@ export default function QuizLandingPage() {
             type="submit"
             className="w-full mt-4 bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 focus:outline-none"
           >
-            Join Quiz
+            Към Quiz-a
           </Button>
         </form>
       </div>

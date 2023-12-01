@@ -95,7 +95,6 @@ const Calendar: React.FC = () => {
           start: start,
           end: end,
           color: event.color,
-          userDisplayName: event.userDisplayName,
         });
         console.log(eventsData);
       });
@@ -140,22 +139,22 @@ const Calendar: React.FC = () => {
 
   const updateEventInFirebase = async function (event: EventInput) {
     try {
-      if (!event.userDisplayName) {
-        console.error("userDisplayName is undefined");
-        return;
-      }
+      console.log("Updating event in Firebase:", event);
 
-      event.color = modalColor;
       console.log(event.color);
       const eventsCollection = collection(db, "events");
-      const eventDoc = doc(eventsCollection, event.id);
-      await updateDoc(eventDoc, {
-        title: event.title,
-        start: event.start,
-        end: event.end,
-        color: event.color,
-        userDisplayName: event.userDisplayName,
-      });
+
+      if (event.id) {
+        const eventDoc = doc(eventsCollection, event.id);
+        await updateDoc(eventDoc, {
+          start: event.start,
+          end: event.end,
+        });
+        console.log("Event updated successfully:", event);
+      } else {
+        const eventRef = await addDoc(eventsCollection, event);
+        event.id = eventRef.id;
+      }
 
       setCurrentEvents(function (prevEvents) {
         return prevEvents.map(function (e) {
@@ -499,10 +498,7 @@ const Calendar: React.FC = () => {
   function renderEventContent(eventContent: EventContentArg) {
     return (
       <>
-        <i>
-          {eventContent.event.title}
-          {eventContent.event.extendedProps.userDisplayName}
-        </i>
+        <i>{eventContent.event.title}</i>
       </>
     );
   }
@@ -523,7 +519,6 @@ const Calendar: React.FC = () => {
           <div className="w-1/2 pl-1">
             <i>
               <span className="font-black">{event.title}</span>
-              {event.userDisplayName}
             </i>
           </div>
         </div>
