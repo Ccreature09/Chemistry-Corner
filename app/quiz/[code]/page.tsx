@@ -378,8 +378,7 @@ export default function Page({ params }: { params: { code: string } }) {
       }
       setIntermissionTime(null);
 
-      // Enable answers for the next question
-      setAnswersDisabled(false); // Set answersDisabled to false
+      setAnswersDisabled(false);
     }
   }, [
     quizStarted,
@@ -400,7 +399,14 @@ export default function Page({ params }: { params: { code: string } }) {
           ? score +
             currentQuiz.questions[currentQuestionIndex].questionPoints +
             (currentQuiz.hasBonusPoints
-              ? Math.max(0, currentQuiz.maxBonusPoints - elapsedTime) //FIX
+              ? Math.max(
+                  0,
+                  currentQuiz.maxBonusPoints *
+                    (1 -
+                      elapsedTime /
+                        currentQuiz.questions[currentQuestionIndex]
+                          .questionTime)
+                )
               : 0)
           : score;
       console.log(currentQuiz?.hasBonusPoints);
@@ -587,6 +593,11 @@ export default function Page({ params }: { params: { code: string } }) {
                     Join Quiz
                   </Button>
                 )}
+                {isNameEntered && (
+                  <h2 className="text-4xl mx-5 font-semibold my-5">
+                    Изчакваме учител да започне Quiz-a...
+                  </h2>
+                )}
                 {isAdmin && !isQuizEnded && !quizStarted && isNameEntered && (
                   <>
                     <Button
@@ -596,11 +607,6 @@ export default function Page({ params }: { params: { code: string } }) {
                       Start Quiz
                     </Button>
                   </>
-                )}
-                {isNameEntered && (
-                  <h2 className="text-4xl mx-5 font-semibold my-5">
-                    Изчакваме учител да започне Quiz-a...
-                  </h2>
                 )}
               </div>
               <h3 className="text-2xl md:text-32xl font-bold underline mt-5">
