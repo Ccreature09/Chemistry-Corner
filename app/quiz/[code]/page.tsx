@@ -32,6 +32,8 @@ interface Question {
 interface Quiz {
   questions: Question[];
   quizName: string;
+  hasBonusPoints: boolean;
+  maxBonusPoints: number;
   questionIntermission: number;
 }
 
@@ -78,7 +80,6 @@ export default function Page({ params }: { params: { code: string } }) {
   const [initialQuizStarted, setInitialQuizStarted] = useState<boolean | null>(
     null
   );
-  const [bonusPointsEnabled, setBonusPointsEnabled] = useState(true);
   const [participantName, setParticipantName] = useState("");
   const router = useRouter();
   useEffect(() => {
@@ -107,11 +108,6 @@ export default function Page({ params }: { params: { code: string } }) {
       const quizDoc = quizSnapshot.docs[0];
       const quizData = quizDoc.data();
 
-      if (quizData.quizStarted) {
-        router.push("/quiz");
-        return;
-      }
-
       const questionsRef = collection(db, `quizzes/${quizDoc.id}/questions`);
       const questionsSnapshot = await getDocs(questionsRef);
       const questionsData = questionsSnapshot.docs.map(function (doc) {
@@ -125,12 +121,13 @@ export default function Page({ params }: { params: { code: string } }) {
         questions: questionsData,
         quizName: quizData.quizName,
         questionIntermission: quizData.questionIntermission,
+        hasBonusPoints: quizData.hasBonusPoints,
+        maxBonusPoints: quizData.maxBonusPoints,
       });
 
       setTime(questionsData[0]?.questionTime);
       setCurrentQuestionId(questionsData[0]?.id);
       setNextQuestionId(questionsData[1]?.id || "End of Quiz");
-
       const participants = quizData.participants;
       if (participants) {
         const userNames = Object.values(participants).map(function (
@@ -181,7 +178,12 @@ export default function Page({ params }: { params: { code: string } }) {
         if (doc.exists()) {
           const quizData = doc.data();
           const quizStarted = quizData.quizStarted;
-
+          if (quizData.quizStarted) {
+            if (!isNameEntered) {
+              router.push("/quiz");
+              return;
+            }
+          }
           if (initialQuizStarted === null) {
             setInitialQuizStarted(quizStarted);
           }
@@ -196,7 +198,7 @@ export default function Page({ params }: { params: { code: string } }) {
     return () => {
       unsubscribe();
     };
-  }, [quizCode, initialQuizStarted]);
+  }, [quizCode, initialQuizStarted, isNameEntered]);
 
   useEffect(() => {
     const quizzesRef = collection(db, "quizzes");
@@ -343,7 +345,6 @@ export default function Page({ params }: { params: { code: string } }) {
     currentQuestionIndex,
     selectedAnswerIndex,
     isQuizEnded,
-    bonusPointsEnabled,
     elapsedTime,
   ]);
 
@@ -386,7 +387,7 @@ export default function Page({ params }: { params: { code: string } }) {
     currentQuiz,
     currentQuestionIndex,
     isQuizEnded,
-    answersDisabled, // Add answersDisabled as a dependency
+    answersDisabled,
   ]);
 
   const handleAnswerClick = async function (index: number) {
@@ -394,13 +395,16 @@ export default function Page({ params }: { params: { code: string } }) {
       setSelectedAnswerIndex(index);
       setIsAnswered(true);
 
-      // Update the participant's score in Firestore
       const newScore =
         index === currentQuiz?.questions[currentQuestionIndex]?.correctAnswer
           ? score +
             currentQuiz.questions[currentQuestionIndex].questionPoints +
-            (bonusPointsEnabled ? Math.max(0, 10 - elapsedTime) : 0)
+            (currentQuiz.hasBonusPoints
+              ? Math.max(0, currentQuiz.maxBonusPoints - elapsedTime) //FIX
+              : 0)
           : score;
+      console.log(currentQuiz?.hasBonusPoints);
+      console.log(currentQuiz?.maxBonusPoints);
 
       setScore(newScore);
       updateParticipantScore(participantName, newScore);
@@ -570,7 +574,7 @@ export default function Page({ params }: { params: { code: string } }) {
                       type="text"
                       value={participantName}
                       onChange={(e) => setParticipantName(e.target.value)}
-                      placeholder="Enter your name"
+                      placeholder="Иван"
                       className="p-2 border rounded"
                     />
                   </div>
@@ -585,9 +589,6 @@ export default function Page({ params }: { params: { code: string } }) {
                 )}
                 {isAdmin && !isQuizEnded && !quizStarted && isNameEntered && (
                   <>
-                    <h2 className="text-4xl mx-5 font-bold my-5">
-                      Изчакваме учител да започне Quiz-a...
-                    </h2>
                     <Button
                       className="bg-green-500 text-white py-2 px-4 mt-5 rounded"
                       onClick={handleStartQuiz}
@@ -595,6 +596,11 @@ export default function Page({ params }: { params: { code: string } }) {
                       Start Quiz
                     </Button>
                   </>
+                )}
+                {isNameEntered && (
+                  <h2 className="text-4xl mx-5 font-semibold my-5">
+                    Изчакваме учител да започне Quiz-a...
+                  </h2>
                 )}
               </div>
               <h3 className="text-2xl md:text-32xl font-bold underline mt-5">
@@ -685,16 +691,18 @@ export default function Page({ params }: { params: { code: string } }) {
         {/* Leaderboard Display */}
         {isQuizEnded && (
           <div className="text-center w-3/5">
-            <h2 className="text-7xl font-bold mb-32">Leaderboard</h2>
+            <h2 className="text-4xl md:text-7xl font-bold mb-32">
+              Leaderboard
+            </h2>
             <div className="flex gap-2">
               {/* Display Podium - Silver, Gold, Bronze */}
               {leaderboard.length >= 2 && (
                 <div className="w-1/3 h-[300px] mt-[100px] bg-slate-400 text-white pt-5">
-                  <p className="text-3xl m-2 font-bold">2</p>
-                  <p className="text-4xl font-semibold mx-1 break-words">
+                  <p className="text-xl md:text-3xl m-2 font-bold">2</p>
+                  <p className="text-2xl md:text-4xl font-semibold break-words">
                     {leaderboard[1].name}
                   </p>
-                  <p className="text-2xl mt-4">
+                  <p className="text-xl md:text-2xl mt-4">
                     {leaderboard[1].points} points
                   </p>
                 </div>
@@ -702,11 +710,11 @@ export default function Page({ params }: { params: { code: string } }) {
 
               {leaderboard.length >= 1 && (
                 <div className="w-1/3 h-[400px] bg-yellow-300 text-white pt-5">
-                  <p className="text-3xl m-2 font-bold">1</p>
-                  <p className="text-4xl font-semibold break-words">
+                  <p className="text-xl md:text-3xl m-2 font-bold">1</p>
+                  <p className="text-2xl md:text-4xl font-semibold break-words">
                     {leaderboard[0].name}
                   </p>
-                  <p className="text-2xl mt-4">
+                  <p className="text-xl md:text-2xl mt-4">
                     {leaderboard[0].points} points
                   </p>
                 </div>
@@ -714,36 +722,38 @@ export default function Page({ params }: { params: { code: string } }) {
 
               {leaderboard.length >= 3 && (
                 <div className="w-1/3 h-[200px] mt-[200px] bg-orange-400 text-white pt-5">
-                  <p className="text-3xl m-2 font-bold">1</p>
-                  <p className="text-4xl font-semibold break-words">
+                  <p className="text-xl md:text-3xl m-2 font-bold">3</p>
+                  <p className="text-2xl md:text-4xl font-semibold break-words">
                     {leaderboard[2].name}
                   </p>
-                  <p className="text-2xl mt-4">
+                  <p className="text-xl md:text-2xl mt-4">
                     {leaderboard[2].points} points
                   </p>
                 </div>
               )}
             </div>
-            <div className="mt-5">
-              <table className="table-auto w-full">
-                <thead>
-                  <tr>
-                    <th className="px-4 py-2">#</th>
-                    <th className="px-4 py-2">Name</th>
-                    <th className="px-4 py-2">Points</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {leaderboard.slice(3).map((user, index) => (
-                    <tr key={index}>
-                      <td className="border px-4 py-2">{index + 4}</td>
-                      <td className="border px-4 py-2">{user.name}</td>
-                      <td className="border px-4 py-2">{user.points}</td>
+            {leaderboard.length > 3 && (
+              <div className="mt-5">
+                <table className="table-auto w-full">
+                  <thead>
+                    <tr>
+                      <th className="px-4 py-2">#</th>
+                      <th className="px-4 py-2">Name</th>
+                      <th className="px-4 py-2">Points</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {leaderboard.slice(3).map((user, index) => (
+                      <tr key={index}>
+                        <td className="border px-4 py-2">{index + 4}</td>
+                        <td className="border px-4 py-2">{user.name}</td>
+                        <td className="border px-4 py-2">{user.points}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
 
             {isAdmin && (
               <Button

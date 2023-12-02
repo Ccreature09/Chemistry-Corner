@@ -19,6 +19,8 @@ interface Quiz {
   quizName: string;
   questionIntermission: number;
   quizCode: number;
+  hasBonusPoints: boolean;
+  maxBonusPoints: number;
   questions: Question[];
   [key: string]: any;
 }
@@ -28,6 +30,8 @@ const DynamicForm: React.FC = () => {
     quizName: "",
     questionIntermission: 0,
     quizCode: 0,
+    hasBonusPoints: false,
+    maxBonusPoints: 0,
     questions: [
       {
         questionTitle: "",
@@ -63,6 +67,25 @@ const DynamicForm: React.FC = () => {
       answer: "",
     });
     setCurrentQuiz(updatedQuiz);
+  };
+
+  const handleBonusPointsChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setCurrentQuiz({
+      ...currentQuiz,
+      hasBonusPoints: event.target.checked,
+      maxBonusPoints: event.target.checked ? currentQuiz.maxBonusPoints : 0,
+    });
+  };
+
+  const handleMaxBonusPointsChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setCurrentQuiz({
+      ...currentQuiz,
+      maxBonusPoints: +event.target.value,
+    });
   };
 
   const removeAnswerRow = (questionIndex: number, answerIndex: number) => {
@@ -121,6 +144,8 @@ const DynamicForm: React.FC = () => {
         const quizRef = await addDoc(collection(db, "quizzes"), {
           quizName: currentQuiz.quizName,
           quizCode: currentQuiz.quizCode,
+          hasBonusPoints: currentQuiz.hasBonusPoints,
+          maxBonusPoints: currentQuiz.maxBonusPoints,
           questionIntermission: currentQuiz.questionIntermission,
           quizStarted: false,
         });
@@ -184,6 +209,8 @@ const DynamicForm: React.FC = () => {
       quizName: "",
       questionIntermission: 0,
       quizCode: 0,
+      hasBonusPoints: false,
+      maxBonusPoints: 0,
       questions: [
         {
           questionTitle: "",
@@ -220,6 +247,7 @@ const DynamicForm: React.FC = () => {
           </label>
           <input
             name="questionIntermission"
+            inputMode="numeric"
             value={currentQuiz.questionIntermission}
             type="number"
             onChange={handleQuizChange}
@@ -233,11 +261,38 @@ const DynamicForm: React.FC = () => {
           <input
             name="quizCode"
             value={currentQuiz.quizCode}
+            inputMode="numeric"
             type="number"
             onChange={handleQuizChange}
             className="w-full border p-2"
           />
         </div>
+        <div className="mb-4">
+          <label htmlFor="hasBonusPoints" className="block font-bold mb-2">
+            Has Bonus Points
+          </label>
+          <input
+            name="hasBonusPoints"
+            type="checkbox"
+            checked={currentQuiz.hasBonusPoints}
+            onChange={handleBonusPointsChange}
+          />
+        </div>
+        {currentQuiz.hasBonusPoints && (
+          <div className="mb-4">
+            <label htmlFor="maxBonusPoints" className="block font-bold mb-2">
+              Max Bonus Points
+            </label>
+            <input
+              name="maxBonusPoints"
+              inputMode="numeric"
+              type="number"
+              value={currentQuiz.maxBonusPoints}
+              onChange={handleMaxBonusPointsChange}
+              className="w-full border p-2"
+            />
+          </div>
+        )}
         {currentQuiz.questions.map((question, questionIndex) => (
           <div key={questionIndex} className="mb-4 border p-4 rounded">
             <div className="mb-2">
@@ -264,6 +319,7 @@ const DynamicForm: React.FC = () => {
               </label>
               <input
                 name="questionTime"
+                inputMode="numeric"
                 value={question.questionTime}
                 type="number"
                 onChange={(e) => handleQuestionChange(questionIndex, e)}
@@ -279,6 +335,7 @@ const DynamicForm: React.FC = () => {
               </label>
               <input
                 name="questionPoints"
+                inputMode="numeric"
                 value={question.questionPoints}
                 type="number"
                 onChange={(e) => handleQuestionChange(questionIndex, e)}

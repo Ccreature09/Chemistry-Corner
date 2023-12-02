@@ -11,6 +11,7 @@ import EmbedForm from "@/components/functional/EmbedForm";
 import FetchEmbeds from "@/components/functional/FetchEmbeds";
 import PlanForm from "@/components/functional/planform";
 import QuizForm from "@/components/functional/quizform";
+
 export default function AdminDashboard() {
   const router = useRouter();
 

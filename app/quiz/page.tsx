@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 
 export default function QuizLandingPage() {
   const [quizCode, setQuizCode] = useState("");
+  const [quizError, setQuizError] = useState<string>("");
+
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,9 +28,10 @@ export default function QuizLandingPage() {
     const querySnapshot = await getDocs(q);
 
     if (!querySnapshot.empty) {
+      setQuizError("");
       router.push(`/quiz/${quizCode}`);
     } else {
-      alert("Quiz does not exist.");
+      setQuizError("Quiz с този код не съществува!");
     }
   };
 
@@ -37,7 +40,7 @@ export default function QuizLandingPage() {
       <Navbar />
       <div className="flex flex-col items-center justify-center min-h-screen mx-3 ">
         <h1 className="mb-5 font-bold text-4xl text-center">
-          Въведете Quiz Code!
+          Въведете Quiz код!
         </h1>
 
         <form
@@ -46,12 +49,13 @@ export default function QuizLandingPage() {
         >
           <Input
             type="text"
-            placeholder="Quiz Code"
+            placeholder="Quiz код"
             value={quizCode}
             onChange={(e) => setQuizCode(e.target.value)}
             required
             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none"
           />
+          {quizError != "" && <p className="text-red-500 mt-2">{quizError}</p>}
           <Button
             type="submit"
             className="w-full mt-4 bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 focus:outline-none"

@@ -133,34 +133,52 @@ export const Navbar = () => {
             <DropdownMenuContent>
               <DropdownMenuLabel>Навигация</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Link href="/">Начална Страница</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link href="/periodic-table">Периодична Таблица</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link href="/calendar">Календар</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link href="/blog">Блог</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Link href="/plans">Планове</Link>
-              </DropdownMenuItem>
+              <Link href="/">
+                <DropdownMenuItem className="cursor-pointer">
+                  Начална Страница
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/periodic-table">
+                <DropdownMenuItem className="cursor-pointer">
+                  Периодична Таблица
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/calendar">
+                <DropdownMenuItem className="cursor-pointer">
+                  Календар
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/blog">
+                <DropdownMenuItem className="cursor-pointer">
+                  Блог
+                </DropdownMenuItem>
+              </Link>
+              <Link href="/plans">
+                <DropdownMenuItem className="cursor-pointer">
+                  Планове
+                </DropdownMenuItem>
+              </Link>
+
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>Тестове</DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent>
-                    <DropdownMenuItem>
-                      <Link href="/tests/grade-8">8 Клас</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link href="/tests/grade-9">9 Клас</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link href="/tests/grade-10">10 Клас</Link>
-                    </DropdownMenuItem>
+                    <Link href="/tests/grade-8">
+                      <DropdownMenuItem className="cursor-pointer">
+                        8 Клас
+                      </DropdownMenuItem>
+                    </Link>
+
+                    <Link href="/tests/grade-9">
+                      <DropdownMenuItem className="cursor-pointer">
+                        9 Клас
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/tests/grade-10">
+                      <DropdownMenuItem className="cursor-pointer">
+                        10 Клас
+                      </DropdownMenuItem>
+                    </Link>
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
@@ -168,18 +186,26 @@ export const Navbar = () => {
                 <DropdownMenuSubTrigger>Игри</DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent>
-                    <DropdownMenuItem>
-                      <Link href="/games/grade-8">8 Клас</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link href="/games/grade-9">9 Клас</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link href="/games/grade-10">10 Клас</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link href="/quiz">Quiz</Link>
-                    </DropdownMenuItem>
+                    <Link href="/games/grade-8">
+                      <DropdownMenuItem className="cursor-pointer">
+                        8 Клас
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/games/grade-9">
+                      <DropdownMenuItem className="cursor-pointer">
+                        9 Клас
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/games/grade-10">
+                      <DropdownMenuItem className="cursor-pointer">
+                        10 Клас
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/quiz">
+                      <DropdownMenuItem className="cursor-pointer">
+                        Quiz
+                      </DropdownMenuItem>
+                    </Link>
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
@@ -187,15 +213,21 @@ export const Navbar = () => {
                 <DropdownMenuSubTrigger>STEM</DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
                   <DropdownMenuSubContent>
-                    <DropdownMenuItem>
-                      <Link href="/presentations">Презентации</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link href="/comics">Комикси</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link href="/useful-info">Мисловни Карти</Link>
-                    </DropdownMenuItem>
+                    <Link href="/presentations">
+                      <DropdownMenuItem className="cursor-pointer">
+                        Презентации
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/comics">
+                      <DropdownMenuItem className="cursor-pointer">
+                        Комикси
+                      </DropdownMenuItem>
+                    </Link>
+                    <Link href="/useful-info">
+                      <DropdownMenuItem className="cursor-pointer">
+                        Мисловни Карти
+                      </DropdownMenuItem>
+                    </Link>
                   </DropdownMenuSubContent>
                 </DropdownMenuPortal>
               </DropdownMenuSub>
