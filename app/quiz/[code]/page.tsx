@@ -19,6 +19,7 @@ import { v4 as uuidv4 } from "uuid";
 import { DocumentData } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
+
 interface Question {
   id: string;
   questionTitle: string;
@@ -112,6 +113,7 @@ export default function Page({ params }: { params: { code: string } }) {
       const questionsSnapshot = await getDocs(questionsRef);
       const questionsData = questionsSnapshot.docs.map(function (doc) {
         const data = doc.data() as DocumentData;
+
         return {
           id: doc.id,
           ...data,
@@ -409,8 +411,6 @@ export default function Page({ params }: { params: { code: string } }) {
                 )
               : 0)
           : score;
-      console.log(currentQuiz?.hasBonusPoints);
-      console.log(currentQuiz?.maxBonusPoints);
 
       setScore(newScore);
       updateParticipantScore(participantName, newScore);

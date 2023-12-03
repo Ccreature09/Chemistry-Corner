@@ -116,7 +116,6 @@ export default function Page() {
       });
 
       setSearchResults(articleData.slice(0, 3));
-      console.log(searchResults);
     } catch (error) {
       console.error("Error searching for products: ", error);
       setSearchResults([]);

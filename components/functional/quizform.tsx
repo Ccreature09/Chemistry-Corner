@@ -1,16 +1,22 @@
 import { db } from "@/firebase/firebase";
-import { collection, addDoc } from "firebase/firestore";
-import React from "react";
-interface Answer {
-  answer: string;
-  [key: string]: any;
-}
+import {
+  collection,
+  addDoc,
+  doc,
+  getDoc,
+  getDocs,
+  deleteDoc,
+  updateDoc,
+  DocumentData,
+} from "firebase/firestore";
+import { useState, useEffect } from "react";
 
 interface Question {
+  id: string;
   questionTitle: string;
   questionTime: number;
   questionPoints: number;
-  answers: Answer[];
+  answers: string[];
   correctAnswer: number;
   [key: string]: any;
 }
@@ -25,8 +31,13 @@ interface Quiz {
   [key: string]: any;
 }
 
-const DynamicForm: React.FC = () => {
-  const [currentQuiz, setCurrentQuiz] = React.useState<Quiz>({
+interface DynamicFormProps {
+  editingQuizId: string;
+}
+
+const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
+  const [editingId, setEditingId] = useState("");
+  const [currentQuiz, setCurrentQuiz] = useState<Quiz>({
     quizName: "",
     questionIntermission: 0,
     quizCode: 0,
@@ -34,38 +45,95 @@ const DynamicForm: React.FC = () => {
     maxBonusPoints: 0,
     questions: [
       {
+        id: "",
         questionTitle: "",
         questionTime: 0,
         questionPoints: 0,
-        answers: [{ answer: "" }],
+        answers: [""],
         correctAnswer: 0,
       },
     ],
   });
 
+  useEffect(() => {
+    setEditingId(editingQuizId);
+  }, [editingQuizId]);
+
+  useEffect(() => {
+    const fetchQuizData = async () => {
+      try {
+        const quizDocRef = doc(db, "quizzes", editingId);
+        const quizDocSnapshot = await getDoc(quizDocRef);
+
+        if (quizDocSnapshot.exists()) {
+          const quizData = quizDocSnapshot.data() as Quiz;
+
+          const questionsRef = collection(db, `quizzes/${editingId}/questions`);
+          const questionsSnapshot = await getDocs(questionsRef);
+          const questionsData = questionsSnapshot.docs.map(function (doc) {
+            const data = doc.data() as DocumentData;
+            return {
+              id: doc.id,
+              ...data,
+            } as Question;
+          });
+          setCurrentQuiz({
+            questions: questionsData,
+            quizName: quizData.quizName,
+            quizCode: quizData.quizCode,
+            questionIntermission: quizData.questionIntermission,
+            hasBonusPoints: quizData.hasBonusPoints,
+            maxBonusPoints: quizData.maxBonusPoints,
+          });
+        } else {
+          console.error("Quiz not found");
+        }
+      } catch (error) {
+        console.error("Error fetching quiz data:", error);
+      }
+    };
+
+    if (editingId) {
+      fetchQuizData();
+    }
+  }, [editingId]);
+
   const addQuestionRow = () => {
     let updatedQuiz = { ...currentQuiz };
     updatedQuiz.questions.push({
+      id: "",
       questionTitle: "",
       questionTime: 0,
       questionPoints: 0,
-      answers: [{ answer: "" }],
+      answers: [""],
       correctAnswer: 0,
     });
     setCurrentQuiz(updatedQuiz);
   };
 
-  const removeQuestionRow = (questionIndex: number) => {
-    let updatedQuiz = { ...currentQuiz };
-    updatedQuiz.questions.splice(questionIndex, 1);
-    setCurrentQuiz(updatedQuiz);
+  const removeQuestionRow = async (questionIndex: number) => {
+    try {
+      let updatedQuiz = { ...currentQuiz };
+      const removedQuestion = updatedQuiz.questions.splice(questionIndex, 1)[0];
+      setCurrentQuiz(updatedQuiz);
+
+      if (editingId) {
+        const questionsRef = collection(db, `quizzes/${editingId}/questions`);
+        const questionId = removedQuestion.id;
+
+        if (questionId) {
+          const questionRef = doc(questionsRef, questionId);
+          await deleteDoc(questionRef);
+        }
+      }
+    } catch (error) {
+      console.error("Error removing question:", error);
+    }
   };
 
   const addAnswerRow = (questionIndex: number) => {
     let updatedQuiz = { ...currentQuiz };
-    updatedQuiz.questions[questionIndex].answers.push({
-      answer: "",
-    });
+    updatedQuiz.questions[questionIndex].answers.push("");
     setCurrentQuiz(updatedQuiz);
   };
 
@@ -120,9 +188,8 @@ const DynamicForm: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     let updatedQuiz = { ...currentQuiz };
-    updatedQuiz.questions[questionIndex].answers[answerIndex][
-      event.target.name
-    ] = event.target.value;
+    updatedQuiz.questions[questionIndex].answers[answerIndex] =
+      event.target.value;
     setCurrentQuiz(updatedQuiz);
   };
 
@@ -140,7 +207,47 @@ const DynamicForm: React.FC = () => {
 
   const saveQuizData = async () => {
     if (isValidForm()) {
-      try {
+      if (editingId) {
+        const quizRef = doc(db, "quizzes", editingId);
+        await updateDoc(quizRef, {
+          quizName: currentQuiz.quizName,
+          quizCode: currentQuiz.quizCode,
+          hasBonusPoints: currentQuiz.hasBonusPoints,
+          maxBonusPoints: currentQuiz.maxBonusPoints,
+          questionIntermission: currentQuiz.questionIntermission,
+        });
+
+        const questionsRef = collection(db, `quizzes/${editingId}/questions`);
+        const questionsSnapshot = await getDocs(questionsRef);
+        const questionIds = questionsSnapshot.docs.map((doc) => doc.id);
+
+        for (let index = 0; index < currentQuiz.questions.length; index++) {
+          const question = currentQuiz.questions[index];
+          const questionId = questionIds[index];
+
+          if (questionId) {
+            const questionRef = doc(questionsRef, questionId);
+            await updateDoc(questionRef, {
+              questionTitle: question.questionTitle,
+              questionTime: question.questionTime,
+              possibleAnswers: question.answers.length,
+              answers: question.answers.map((answer) => answer),
+              correctAnswer: question.correctAnswer,
+              questionPoints: question.questionPoints,
+            });
+          } else {
+            const newQuestionRef = await addDoc(questionsRef, {
+              questionTitle: question.questionTitle,
+              questionTime: question.questionTime,
+              possibleAnswers: question.answers.length,
+              answers: question.answers.map((answer) => answer),
+              correctAnswer: question.correctAnswer,
+              questionPoints: question.questionPoints,
+            });
+          }
+        }
+      } else {
+        // If editingQuizId is not provided, add new quiz data
         const quizRef = await addDoc(collection(db, "quizzes"), {
           quizName: currentQuiz.quizName,
           quizCode: currentQuiz.quizCode,
@@ -157,18 +264,16 @@ const DynamicForm: React.FC = () => {
             questionTitle: question.questionTitle,
             questionTime: question.questionTime,
             possibleAnswers: question.answers.length,
-            answers: question.answers.map((answer) => answer.answer),
+            answers: question.answers.map((answer) => answer),
             correctAnswer: question.correctAnswer,
             questionPoints: question.questionPoints,
           });
         }
-
-        alert("Quiz data saved successfully");
-        resetForm();
-      } catch (error) {
-        console.error("Error saving quiz data: ", error);
-        alert("Error saving quiz data. Please try again.");
       }
+
+      alert("Quiz data saved successfully");
+      setEditingId("");
+      resetForm();
     } else {
       alert("Form Invalid");
     }
@@ -196,7 +301,7 @@ const DynamicForm: React.FC = () => {
         (field) => !question[field]
       );
 
-      const hasBlankAnswer = question.answers.some((answer) => !answer.answer);
+      const hasBlankAnswer = question.answers.some((answer) => !answer);
 
       return hasBlankQuestionField || hasBlankAnswer;
     });
@@ -213,10 +318,11 @@ const DynamicForm: React.FC = () => {
       maxBonusPoints: 0,
       questions: [
         {
+          id: "",
           questionTitle: "",
           questionTime: 0,
           questionPoints: 0,
-          answers: [{ answer: "" }],
+          answers: [""],
           correctAnswer: 0,
         },
       ],
@@ -293,114 +399,116 @@ const DynamicForm: React.FC = () => {
             />
           </div>
         )}
-        {currentQuiz.questions.map((question, questionIndex) => (
-          <div key={questionIndex} className="mb-4 border p-4 rounded">
-            <div className="mb-2">
-              <label
-                htmlFor={`questionTitle-${questionIndex}`}
-                className="block font-bold mb-2"
-              >
-                Question Title
-              </label>
-              <input
-                name="questionTitle"
-                value={question.questionTitle}
-                type="text"
-                onChange={(e) => handleQuestionChange(questionIndex, e)}
-                className="w-full border p-2"
-              />
-            </div>
-            <div className="mb-2">
-              <label
-                htmlFor={`questionTime-${questionIndex}`}
-                className="block font-bold mb-2"
-              >
-                Question Time
-              </label>
-              <input
-                name="questionTime"
-                inputMode="numeric"
-                value={question.questionTime}
-                type="number"
-                onChange={(e) => handleQuestionChange(questionIndex, e)}
-                className="w-full border p-2"
-              />
-            </div>
-            <div className="mb-2">
-              <label
-                htmlFor={`questionPoints-${questionIndex}`}
-                className="block font-bold mb-2"
-              >
-                Question Points
-              </label>
-              <input
-                name="questionPoints"
-                inputMode="numeric"
-                value={question.questionPoints}
-                type="number"
-                onChange={(e) => handleQuestionChange(questionIndex, e)}
-                className="w-full border p-2"
-              />
-            </div>
-            {question.answers.map((answer, answerIndex) => (
-              <div key={answerIndex} className="flex items-center mb-2">
+
+        {currentQuiz.questions &&
+          currentQuiz.questions.map((question, questionIndex) => (
+            <div key={questionIndex} className="mb-4 border p-4 rounded">
+              <div className="mb-2">
                 <label
-                  htmlFor={`answer-${questionIndex}-${answerIndex}`}
-                  className="block font-bold mr-2"
+                  htmlFor={`questionTitle-${questionIndex}`}
+                  className="block font-bold mb-2"
                 >
-                  Answer
+                  Question Title
                 </label>
                 <input
-                  name="answer"
+                  name="questionTitle"
+                  value={question.questionTitle}
                   type="text"
-                  value={answer.answer}
-                  onChange={(e) =>
-                    handleAnswerChange(questionIndex, answerIndex, e)
-                  }
+                  onChange={(e) => handleQuestionChange(questionIndex, e)}
                   className="w-full border p-2"
                 />
-                <button
-                  onClick={() => removeAnswerRow(questionIndex, answerIndex)}
-                  className="ml-2 bg-red-500 text-white px-2 py-1 rounded"
-                >
-                  -
-                </button>
               </div>
-            ))}
-            <div className="mb-2">
-              <label
-                htmlFor={`correct-answer-${questionIndex}`}
-                className="block font-bold mb-2"
+              <div className="mb-2">
+                <label
+                  htmlFor={`questionTime-${questionIndex}`}
+                  className="block font-bold mb-2"
+                >
+                  Question Time
+                </label>
+                <input
+                  name="questionTime"
+                  inputMode="numeric"
+                  value={question.questionTime}
+                  type="number"
+                  onChange={(e) => handleQuestionChange(questionIndex, e)}
+                  className="w-full border p-2"
+                />
+              </div>
+              <div className="mb-2">
+                <label
+                  htmlFor={`questionPoints-${questionIndex}`}
+                  className="block font-bold mb-2"
+                >
+                  Question Points
+                </label>
+                <input
+                  name="questionPoints"
+                  inputMode="numeric"
+                  value={question.questionPoints}
+                  type="number"
+                  onChange={(e) => handleQuestionChange(questionIndex, e)}
+                  className="w-full border p-2"
+                />
+              </div>
+              {question.answers.map((answer, answerIndex) => (
+                <div key={answerIndex} className="flex items-center mb-2">
+                  <label
+                    htmlFor={`answer-${questionIndex}-${answerIndex}`}
+                    className="block font-bold mr-2"
+                  >
+                    Answer
+                  </label>
+                  <input
+                    name="answer"
+                    type="text"
+                    value={answer}
+                    onChange={(e) =>
+                      handleAnswerChange(questionIndex, answerIndex, e)
+                    }
+                    className="w-full border p-2"
+                  />
+                  <button
+                    onClick={() => removeAnswerRow(questionIndex, answerIndex)}
+                    className="ml-2 bg-red-500 text-white px-2 py-1 rounded"
+                  >
+                    -
+                  </button>
+                </div>
+              ))}
+              <div className="mb-2">
+                <label
+                  htmlFor={`correct-answer-${questionIndex}`}
+                  className="block font-bold mb-2"
+                >
+                  Correct Answer
+                </label>
+                <select
+                  name="correctAnswer"
+                  value={question.correctAnswer}
+                  onChange={(e) => handleCorrectAnswerChange(questionIndex, e)}
+                  className="w-full border p-2"
+                >
+                  {question.answers.map((_, index) => (
+                    <option key={index} value={index}>
+                      {index + 1}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button
+                onClick={() => addAnswerRow(questionIndex)}
+                className="bg-green-500 text-white px-2 py-1 rounded"
               >
-                Correct Answer
-              </label>
-              <select
-                name="correctAnswer"
-                value={question.correctAnswer}
-                onChange={(e) => handleCorrectAnswerChange(questionIndex, e)}
-                className="w-full border p-2"
+                Add Answer
+              </button>
+              <button
+                onClick={() => removeQuestionRow(questionIndex)}
+                className="ml-2 bg-red-500 text-white px-2 py-1 rounded"
               >
-                {question.answers.map((_, index) => (
-                  <option key={index} value={index}>
-                    {index + 1}
-                  </option>
-                ))}
-              </select>
+                Remove Question
+              </button>
             </div>
-            <button
-              onClick={() => addAnswerRow(questionIndex)}
-              className="bg-green-500 text-white px-2 py-1 rounded"
-            >
-              Add Answer
-            </button>
-            <button
-              onClick={() => removeQuestionRow(questionIndex)}
-              className="ml-2 bg-red-500 text-white px-2 py-1 rounded"
-            >
-              Remove Question
-            </button>
-          </div>
-        ))}
+          ))}
         <button
           onClick={() => addQuestionRow()}
           className="bg-blue-500 text-white px-2 py-1 rounded"
@@ -413,7 +521,7 @@ const DynamicForm: React.FC = () => {
         onClick={saveQuizData}
         className="bg-purple-500 text-white px-4 py-2 rounded"
       >
-        Save Quiz Data
+        {editingId ? "Edit Quiz Data" : "Create Quiz"}
       </button>
     </div>
   );

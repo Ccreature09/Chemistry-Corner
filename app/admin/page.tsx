@@ -11,10 +11,10 @@ import EmbedForm from "@/components/functional/EmbedForm";
 import FetchEmbeds from "@/components/functional/FetchEmbeds";
 import PlanForm from "@/components/functional/planform";
 import QuizForm from "@/components/functional/quizform";
-
+import FetchQuizzes from "@/components/functional/fetchquizzes";
 export default function AdminDashboard() {
   const router = useRouter();
-
+  const [editingQuizId, setEditingQuizId] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const adminArray = [
     "KSca1U09jwMSIK0qYedXZDhe7d02",
@@ -145,7 +145,10 @@ export default function AdminDashboard() {
                 <PlanForm />
               </TabsContent>
               <TabsContent value="quizzes">
-                <QuizForm />
+                <QuizForm editingQuizId={editingQuizId} />
+                <FetchQuizzes
+                  onEditQuiz={(quizId) => setEditingQuizId(quizId)}
+                />
               </TabsContent>
               <TabsContent value="settings"></TabsContent>
             </Tabs>
