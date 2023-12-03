@@ -623,14 +623,16 @@ export default function Page({ params }: { params: { code: string } }) {
             <>
               {/* Question Timer */}
               {time !== null && !showAnswer && !isQuizEnded && (
-                <div className="flex justify-center items-center bg-blue-300 w-16 h-16 rounded-full mx-auto my-5 md:w-20 md:h-20">
-                  <p className="text-base md:text-5xl text-white">{time}</p>
+                <div className="flex justify-center items-center bg-blue-300 w-36 h-36 rounded-full mx-auto my-5 md:w-20 mb-16 md:h-20">
+                  <p className="text-5xl font-semibold md:text-5xl text-white">
+                    {time}
+                  </p>
                 </div>
               )}
               {/* Intermission Timer */}
               {intermissionTime !== null && showAnswer && !isQuizEnded && (
                 <div className="text-center mt-4">
-                  <p className="text-3xl mb-5 font-bold">
+                  <p className="text-2xl mb-5 font-bold">
                     Следващ въпрос след: {intermissionTime}
                   </p>
                 </div>
@@ -653,7 +655,7 @@ export default function Page({ params }: { params: { code: string } }) {
                         return (
                           <Button
                             key={index}
-                            className={`w-full h-32 py-2 px-36 rounded text-xl text-white font-bold ${
+                            className={`w-4/5 h-32 px-36 mx-auto rounded text-xl text-white font-bold ${
                               index ===
                                 currentQuiz?.questions[currentQuestionIndex]
                                   ?.correctAnswer && showAnswer

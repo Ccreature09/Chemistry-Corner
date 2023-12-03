@@ -49,7 +49,9 @@ export default function QuizLandingPage() {
         >
           <OtpInput
             value={quizCode}
-            inputStyle={"border rounded-lg border-2"}
+            inputStyle={
+              "border rounded-lg border-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            }
             onChange={setQuizCode}
             numInputs={6}
             inputType="number"

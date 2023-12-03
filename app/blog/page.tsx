@@ -179,14 +179,14 @@ export default function Page() {
               {articles.map((article, index) => (
                 <div
                   key={index}
-                  className="border border-gray-300 rounded p-4 my-4 relative" // Add relative positioning
+                  className="border border-gray-300 rounded p-4 my-4 "
                 >
                   {user && (user.uid === article.uid || isAdmin) && (
                     <Button
                       onClick={() => handleBlogDelete(article.id)}
-                      className="cursor-pointer absolute top-5 right-5" // Use absolute positioning
+                      className="cursor-pointer mb-3 w-full bg-red-500"
                     >
-                      Delete Blog
+                      Изтрий блог
                     </Button>
                   )}
 
