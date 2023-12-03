@@ -568,8 +568,8 @@ export default function Page({ params }: { params: { code: string } }) {
             <div className="shadow-xl p-5 rounded-lg mx-5">
               <div>
                 {!isNameEntered && (
-                  <div className="mb-4 ">
-                    <h1 className="font-bold text-6xl md:text-7xl mb-8">
+                  <div className="mb-4 flex flex-col ">
+                    <h1 className="font-bold text-4xl md:text-7xl mb-8 max-w-2xl mx-auto text-center break-words">
                       {currentQuiz?.quizName}
                     </h1>
 
