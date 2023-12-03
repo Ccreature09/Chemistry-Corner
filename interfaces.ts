@@ -14,6 +14,7 @@ export interface Question {
 
 export interface Quiz {
   quizName: string;
+  quizStarted: boolean;
   questionIntermission: number;
   quizCode: number;
   hasBonusPoints: boolean;
