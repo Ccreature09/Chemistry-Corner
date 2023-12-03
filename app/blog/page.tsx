@@ -168,7 +168,7 @@ export default function Page() {
               <BlogForm />
             ) : (
               <div className="dark:bg-white  dark:text-black text-sm text-white bg-slate-900  w-full md:w-1/6 text-center my-auto p-2 font-semibold rounded-md">
-                Sign in to Create blog
+                Регистрирай се за да създадеш блог
               </div>
             )}
           </div>
