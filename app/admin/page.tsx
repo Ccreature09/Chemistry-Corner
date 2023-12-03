@@ -39,8 +39,8 @@ export default function AdminDashboard() {
       <div className="mx-auto p-4 max-w-screen-xl">
         {isAdmin && (
           <div className="container mx-auto p-4">
-            <Tabs defaultValue="Blog Moderation" className="">
-              <TabsList className="w-full mb-5">
+            <Tabs defaultValue="Blog Moderation">
+              <TabsList className="w-full mb-5 overflow-x-auto">
                 <TabsTrigger value="Blog Moderation">
                   Блог Управление
                 </TabsTrigger>
@@ -53,7 +53,7 @@ export default function AdminDashboard() {
                 </TabsTrigger>
 
                 <TabsTrigger value="plans">Планове</TabsTrigger>
-                <TabsTrigger value="quizzes">Quizzes</TabsTrigger>
+                <TabsTrigger value="quizzes">Quizz-ове</TabsTrigger>
 
                 <TabsTrigger value="settings">Настройки</TabsTrigger>
               </TabsList>

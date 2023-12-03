@@ -48,23 +48,25 @@ const FetchQuizzes: React.FC<FetchQuizzesProps> = ({ onEditQuiz }) => {
 
   return (
     <div>
-      <h2 className="font-semibold text-2xl m-5">Quizzes</h2>
+      <h2 className="font-semibold text-2xl m-5">Quizz-ове</h2>
       <div className="grid grid-cols-3 gap-4">
         {quizzes.map((quiz) => (
           <div key={quiz.id} className="border relative p-4">
             <h3 className="text-center text-3xl mb-2">{quiz.quizName}</h3>
-            <p className="text-center mb-8">Код: {quiz.quizCode}</p>
+            <p className="text-center font-semibold text-2xl mb-16">
+              Код: {quiz.quizCode}
+            </p>
             <Button
               className="absolute bottom-2 left-8"
               onClick={() => onEditQuiz(quiz.id)}
             >
-              Edit
+              Редактирай
             </Button>
             <Button
               className="absolute bottom-2 right-8"
               onClick={() => handleDeleteQuiz(quiz.id)}
             >
-              Delete
+              Изтрий
             </Button>
           </div>
         ))}

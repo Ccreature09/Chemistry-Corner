@@ -590,7 +590,7 @@ export default function Page({ params }: { params: { code: string } }) {
                     className="bg-green-500 text-white py-2 px-4 rounded md:py-3 md:px-6"
                     onClick={handleNameSubmit}
                   >
-                    Join Quiz
+                    Влез в Quiz-a
                   </Button>
                 )}
                 {isNameEntered && (
@@ -604,7 +604,7 @@ export default function Page({ params }: { params: { code: string } }) {
                       className="bg-green-500 text-white py-2 px-4 mt-5 rounded"
                       onClick={handleStartQuiz}
                     >
-                      Start Quiz
+                      Започни Quiz
                     </Button>
                   </>
                 )}
@@ -630,8 +630,8 @@ export default function Page({ params }: { params: { code: string } }) {
               {/* Intermission Timer */}
               {intermissionTime !== null && showAnswer && !isQuizEnded && (
                 <div className="text-center mt-4">
-                  <p className="text-3xl font-bold">
-                    Next question in: {intermissionTime}
+                  <p className="text-3xl mb-5 font-bold">
+                    Следващ въпрос след: {intermissionTime}
                   </p>
                 </div>
               )}
@@ -674,7 +674,7 @@ export default function Page({ params }: { params: { code: string } }) {
                       currentQuiz.questions[currentQuestionIndex] &&
                       showAnswer && (
                         <div className="text-green-500 text-4xl w-full">
-                          Correct Answer:{" "}
+                          Правилният отговор е{" "}
                           {
                             currentQuiz.questions[currentQuestionIndex].answers[
                               currentQuiz.questions[currentQuestionIndex]
@@ -683,7 +683,7 @@ export default function Page({ params }: { params: { code: string } }) {
                           }
                           <div className="text-center">
                             <h3 className="text-3xl font-bold">
-                              Score: {score}
+                              Резултат: {score}
                             </h3>
                           </div>
                         </div>
@@ -697,9 +697,7 @@ export default function Page({ params }: { params: { code: string } }) {
         {/* Leaderboard Display */}
         {isQuizEnded && (
           <div className="text-center w-3/5">
-            <h2 className="text-4xl md:text-7xl font-bold mb-32">
-              Leaderboard
-            </h2>
+            <h2 className="text-4xl md:text-7xl font-bold mb-32">Класация</h2>
             <div className="flex gap-2">
               {/* Display Podium - Silver, Gold, Bronze */}
               {leaderboard.length >= 2 && (
@@ -709,7 +707,7 @@ export default function Page({ params }: { params: { code: string } }) {
                     {leaderboard[1].name}
                   </p>
                   <p className="text-xl md:text-2xl mt-4">
-                    {leaderboard[1].points} points
+                    {leaderboard[1].points} точки
                   </p>
                 </div>
               )}
@@ -721,7 +719,7 @@ export default function Page({ params }: { params: { code: string } }) {
                     {leaderboard[0].name}
                   </p>
                   <p className="text-xl md:text-2xl mt-4">
-                    {leaderboard[0].points} points
+                    {leaderboard[0].points} точки
                   </p>
                 </div>
               )}
@@ -733,7 +731,7 @@ export default function Page({ params }: { params: { code: string } }) {
                     {leaderboard[2].name}
                   </p>
                   <p className="text-xl md:text-2xl mt-4">
-                    {leaderboard[2].points} points
+                    {leaderboard[2].points} точки
                   </p>
                 </div>
               )}
@@ -744,8 +742,8 @@ export default function Page({ params }: { params: { code: string } }) {
                   <thead>
                     <tr>
                       <th className="px-4 py-2">#</th>
-                      <th className="px-4 py-2">Name</th>
-                      <th className="px-4 py-2">Points</th>
+                      <th className="px-4 py-2">Име</th>
+                      <th className="px-4 py-2">Точки</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -766,7 +764,7 @@ export default function Page({ params }: { params: { code: string } }) {
                 className="bg-red-500 text-white py-2 px-4 mt-5 rounded"
                 onClick={handleResetQuiz}
               >
-                Reset Quiz
+                Рестартирай Quiz
               </Button>
             )}
           </div>

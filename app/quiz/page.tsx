@@ -6,7 +6,7 @@ import { db } from "@/firebase/firebase";
 import { Navbar } from "@/components/functional/navbar";
 import { Footer } from "@/components/functional/footer";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import OtpInput from "react-otp-input";
 
 export default function QuizLandingPage() {
   const [quizCode, setQuizCode] = useState("");
@@ -47,14 +47,18 @@ export default function QuizLandingPage() {
           onSubmit={handleSubmit}
           className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full"
         >
-          <Input
-            type="text"
-            placeholder="Quiz код"
+          <OtpInput
             value={quizCode}
-            onChange={(e) => setQuizCode(e.target.value)}
-            required
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none"
+            inputStyle={"border rounded-lg border-2"}
+            onChange={setQuizCode}
+            numInputs={6}
+            inputType="number"
+            containerStyle={"w-full text-4xl flex justify-center gap-2 "}
+            shouldAutoFocus
+            renderSeparator={<span> </span>}
+            renderInput={(props) => <input {...props} />}
           />
+
           {quizError != "" && <p className="text-red-500 mt-2">{quizError}</p>}
           <Button
             type="submit"

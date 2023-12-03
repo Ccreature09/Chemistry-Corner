@@ -334,7 +334,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
       <div className="mb-8 p-4 border rounded">
         <div className="mb-4">
           <label htmlFor="quizName" className="block font-bold mb-2">
-            Quiz Name
+            Quiz име
           </label>
           <input
             name="quizName"
@@ -349,7 +349,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
             htmlFor="questionIntermission"
             className="block font-bold mb-2"
           >
-            Question Intermission
+            Пауза между въпросите (секунди)
           </label>
           <input
             name="questionIntermission"
@@ -362,7 +362,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
         </div>
         <div className="mb-4">
           <label htmlFor="quizCode" className="block font-bold mb-2">
-            Quiz Code
+            Quiz код
           </label>
           <input
             name="quizCode"
@@ -375,7 +375,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
         </div>
         <div className="mb-4">
           <label htmlFor="hasBonusPoints" className="block font-bold mb-2">
-            Has Bonus Points
+            Има бонус точки (спрямо времето)
           </label>
           <input
             name="hasBonusPoints"
@@ -387,7 +387,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
         {currentQuiz.hasBonusPoints && (
           <div className="mb-4">
             <label htmlFor="maxBonusPoints" className="block font-bold mb-2">
-              Max Bonus Points
+              Максимален брой бонус точки
             </label>
             <input
               name="maxBonusPoints"
@@ -408,7 +408,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
                   htmlFor={`questionTitle-${questionIndex}`}
                   className="block font-bold mb-2"
                 >
-                  Question Title
+                  Въпрос
                 </label>
                 <input
                   name="questionTitle"
@@ -423,7 +423,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
                   htmlFor={`questionTime-${questionIndex}`}
                   className="block font-bold mb-2"
                 >
-                  Question Time
+                  Време за решаване (секунди)
                 </label>
                 <input
                   name="questionTime"
@@ -439,7 +439,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
                   htmlFor={`questionPoints-${questionIndex}`}
                   className="block font-bold mb-2"
                 >
-                  Question Points
+                  Точки
                 </label>
                 <input
                   name="questionPoints"
@@ -456,7 +456,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
                     htmlFor={`answer-${questionIndex}-${answerIndex}`}
                     className="block font-bold mr-2"
                   >
-                    Answer
+                    Отговор
                   </label>
                   <input
                     name="answer"
@@ -480,7 +480,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
                   htmlFor={`correct-answer-${questionIndex}`}
                   className="block font-bold mb-2"
                 >
-                  Correct Answer
+                  Правилен отговор
                 </label>
                 <select
                   name="correctAnswer"
@@ -497,15 +497,15 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
               </div>
               <button
                 onClick={() => addAnswerRow(questionIndex)}
-                className="bg-green-500 text-white px-2 py-1 rounded"
+                className="bg-green-500 mr-2 mt-2 text-white px-2 py-1 rounded"
               >
-                Add Answer
+                Добави отговор
               </button>
               <button
                 onClick={() => removeQuestionRow(questionIndex)}
-                className="ml-2 bg-red-500 text-white px-2 py-1 rounded"
+                className=" bg-red-500 mt-2 text-white px-2 py-1 rounded"
               >
-                Remove Question
+                Изтрий въпрос
               </button>
             </div>
           ))}
@@ -513,7 +513,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
           onClick={() => addQuestionRow()}
           className="bg-blue-500 text-white px-2 py-1 rounded"
         >
-          Add Question
+          Добави въпрос
         </button>
       </div>
 
@@ -521,7 +521,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
         onClick={saveQuizData}
         className="bg-purple-500 text-white px-4 py-2 rounded"
       >
-        {editingId ? "Edit Quiz Data" : "Create Quiz"}
+        {editingId ? "Редактирай Quiz" : "Създай Quiz"}
       </button>
     </div>
   );
