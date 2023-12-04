@@ -234,7 +234,7 @@ export const Navbar = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <NavigationMenu className="hidden xl:flex">
+          <NavigationMenu className="hidden xl:flex mt-2">
             <NavigationMenuList className="gap-3">
               <NavigationMenuItem>
                 <NavigationMenuTrigger>Тестове</NavigationMenuTrigger>

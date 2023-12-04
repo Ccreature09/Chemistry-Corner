@@ -39,7 +39,7 @@ export default function AdminDashboard() {
       <div className="mx-auto p-4 max-w-screen-xl">
         {isAdmin && (
           <div className="container mx-auto p-4">
-            <Tabs defaultValue="Blog Moderation">
+            <Tabs defaultValue="forum">
               <TabsList className="w-full mb-5 overflow-x-auto">
                 <TabsTrigger value="forum">Форум</TabsTrigger>
                 <TabsTrigger value="tests">Тестове</TabsTrigger>
@@ -59,7 +59,7 @@ export default function AdminDashboard() {
                 <ForumMod />
               </TabsContent>
               <TabsContent value="tests">
-                <Tabs defaultValue="grade-8">
+                <Tabs defaultValue="Grade 8">
                   <TabsList className="w-full mb-5">
                     <TabsTrigger value="Grade 8">8 клас</TabsTrigger>
                     <TabsTrigger value="Grade 9">9 клас</TabsTrigger>
@@ -92,7 +92,7 @@ export default function AdminDashboard() {
                 </Tabs>
               </TabsContent>
               <TabsContent value="games">
-                <Tabs defaultValue="grade-8">
+                <Tabs defaultValue="Grade 8">
                   <TabsList className="w-full mb-5">
                     <TabsTrigger value="Grade 8">8 клас</TabsTrigger>
                     <TabsTrigger value="Grade 9">9 клас</TabsTrigger>

@@ -50,7 +50,7 @@ const ElementGrid: React.FC<ElementTableProps> = ({
     >
       {element ? (
         <div
-          className={`border-2 border-blue-400 shadow-xl relative w-24 h-24 flex flex-col items-center justify-center hover:scale-150 hover:text-white hover:cursor-pointer transform hover:bg-blue-500 hover:z-10 transition-transform duration-200 ${
+          className={`border-2 border-blue-400 shadow-xl relative w-24 h-24 flex flex-col items-center justify-center  hover:scale-150 hover:text-white hover:cursor-pointer transform hover:bg-blue-500 hover:z-10 transition-transform duration-200 ${
             selectedElement === element ? "bg-gray-300" : ""
           }`}
         >

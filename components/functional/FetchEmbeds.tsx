@@ -20,7 +20,7 @@ interface Embed {
 
 interface FetchEmbedsProps {
   grade?: string;
-  category: "games" | "tests" | "presentations" | "comics" | "mindmaps"; // Add "mindmaps" category
+  category: "games" | "tests" | "presentations" | "comics" | "mindmaps";
   admin?: boolean;
 }
 
