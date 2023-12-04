@@ -109,12 +109,12 @@ export const Navbar = () => {
                 width={1000}
                 height={1000}
                 priority
-                className="w-44  my-auto hidden  md:flex mb-3 md:w-96 "
+                className="w-44  my-auto hidden  md:flex mx-10 md:w-96 "
               />
             </Link>
           </div>
           <DropdownMenu>
-            <DropdownMenuTrigger className="xl:hidden flex items-center mx-8">
+            <DropdownMenuTrigger className="xl:hidden flex items-center ">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -370,7 +370,7 @@ export const Navbar = () => {
             <PopoverTrigger className="flex items-center mx-8">
               {!user ? (
                 <>
-                  <div className=" rounded-lg text-white p-2 flex">
+                  <div className=" rounded-lg text-white p-2 mx-10 flex">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="w-16 rounded-lg p-1 text-white bg-white"
@@ -386,7 +386,7 @@ export const Navbar = () => {
                 </>
               ) : user && profileImageUrl ? (
                 profileImageUrl && (
-                  <div className=" flex flex-col justify-center mx-3">
+                  <div className=" flex flex-col justify-center mx-10">
                     <Avatar className="flex mx-auto">
                       <AvatarImage src={profileImageUrl} alt="User" />
                       <AvatarFallback>{user.displayName}</AvatarFallback>
