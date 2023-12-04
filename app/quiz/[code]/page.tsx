@@ -19,10 +19,11 @@ import { v4 as uuidv4 } from "uuid";
 import { DocumentData } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
-
+import Image from "next/image";
 interface Question {
   id: string;
   questionTitle: string;
+  photoURL: string;
   answers: string[];
   correctAnswer: number;
   questionPoints: number;
@@ -227,7 +228,7 @@ export default function Page({ params }: { params: { code: string } }) {
     });
 
     return () => unsubscribe();
-  }, [quizCode, db]);
+  }, [quizCode]);
   function convertParticipantsMapToArray(
     participantsMap: Record<string, Participant> | undefined
   ) {
@@ -280,11 +281,10 @@ export default function Page({ params }: { params: { code: string } }) {
       const unsubscribe = onSnapshot(q, () => {});
       unsubscribe();
     };
-  }, [quizCode, db]);
+  }, [quizCode]);
 
   const handleStartQuiz = async function () {
     try {
-      // Query for the current quiz
       const quizzesRef = collection(db, "quizzes");
       const quizQuery = query(
         quizzesRef,
@@ -297,11 +297,9 @@ export default function Page({ params }: { params: { code: string } }) {
         return;
       }
 
-      // Get the document reference for the current quiz
       const quizDoc = quizSnapshot.docs[0];
       const quizDocRef = doc(db, "quizzes", quizDoc.id);
 
-      // Update the quizStarted field to true
       await updateDoc(quizDocRef, {
         quizStarted: true,
       });
@@ -331,12 +329,10 @@ export default function Page({ params }: { params: { code: string } }) {
       setIntermissionTime(currentQuiz?.questionIntermission ?? 5);
       setAnswersDisabled(true);
 
-      // Reset the timer for the next question
       const nextQuestionTime =
         currentQuiz?.questions[currentQuestionIndex]?.questionTime;
       setTime(nextQuestionTime !== undefined ? nextQuestionTime : null);
 
-      // Disable answers when the timer hits 0
       setAnswersDisabled(true);
     }
   }, [
@@ -416,6 +412,34 @@ export default function Page({ params }: { params: { code: string } }) {
       updateParticipantScore(participantName, newScore);
     }
   };
+  const renderSubscripts = (text: string) => {
+    const subscriptMap: Record<string, string> = {
+      "0": "₀",
+      "1": "₁",
+      "2": "₂",
+      "3": "₃",
+      "4": "₄",
+      "5": "₅",
+      "6": "₆",
+      "7": "₇",
+      "8": "₈",
+      "9": "₉",
+    };
+
+    return text
+      .split(/<sub>([0-9]+)<\/sub>/g)
+      .map((part, index) => {
+        if (index % 2 === 1) {
+          return part.replace(
+            /[0-9]/g,
+            (match) => subscriptMap[match as keyof typeof subscriptMap] || match
+          );
+        } else {
+          return part;
+        }
+      })
+      .join("");
+  };
 
   async function handleEndOfQuiz() {
     setIsQuizEnded(true);
@@ -467,14 +491,12 @@ export default function Page({ params }: { params: { code: string } }) {
 
       const participantMap = quizDoc.data()?.participants || {};
 
-      // Check if the quiz has already started
       const quizStarted = quizDoc.data()?.quizStarted;
       if (quizStarted) {
         console.error("Quiz has already started. Cannot join now.");
         return;
       }
 
-      // Check if the participantId already exists in the map
       if (!participantMap[participantId]) {
         participantMap[participantId] = {
           name: participantName,
@@ -513,7 +535,6 @@ export default function Page({ params }: { params: { code: string } }) {
 
       const participantMap = quizDoc.data()?.participants || {};
 
-      // Find the participant by name and update their score
       const participantToUpdate = Object.values<UserScore>(participantMap).find(
         (participant) => participant.name === participantName
       );
@@ -532,7 +553,6 @@ export default function Page({ params }: { params: { code: string } }) {
 
   const handleResetQuiz = async () => {
     try {
-      // Reset the quiz in Firestore
       const quizzesRef = collection(db, "quizzes");
       const quizQuery = query(
         quizzesRef,
@@ -643,11 +663,21 @@ export default function Page({ params }: { params: { code: string } }) {
                 currentQuiz.questions[currentQuestionIndex] && (
                   <div className="w-full">
                     <h2 className="text-4xl md:text-6xl font-bold mb-5">
-                      {
+                      {renderSubscripts(
                         currentQuiz.questions[currentQuestionIndex]
                           .questionTitle
-                      }
+                      )}
                     </h2>
+                    {currentQuiz.questions[currentQuestionIndex].photoURL && (
+                      <img
+                        src={
+                          currentQuiz.questions[currentQuestionIndex].photoURL
+                        }
+                        alt={`Question ${currentQuestionIndex + 1}`}
+                        className=" mx-auto h-80 mb-5"
+                      />
+                    )}
+
                     <div className="grid grid-cols-1 md:grid-cols-2 w-full gap-4 mb-10">
                       {currentQuiz?.questions[
                         currentQuestionIndex
@@ -667,7 +697,7 @@ export default function Page({ params }: { params: { code: string } }) {
                             onClick={() => handleAnswerClick(index)}
                             disabled={isAnswered || answersDisabled}
                           >
-                            {answer}
+                            {renderSubscripts(answer)}
                           </Button>
                         );
                       })}

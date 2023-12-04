@@ -28,8 +28,15 @@ export default function QuizLandingPage() {
     const querySnapshot = await getDocs(q);
 
     if (!querySnapshot.empty) {
-      setQuizError("");
-      router.push(`/quiz/${quizCode}`);
+      const quizDoc = querySnapshot.docs[0];
+      const quizData = quizDoc.data();
+
+      if (quizData.quizStarted) {
+        setQuizError("Quiz-ът вече е започнал!");
+      } else {
+        setQuizError("");
+        router.push(`/quiz/${quizCode}`);
+      }
     } else {
       setQuizError("Quiz с този код не съществува!");
     }

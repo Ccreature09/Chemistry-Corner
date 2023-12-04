@@ -1,4 +1,4 @@
-import { db } from "@/firebase/firebase";
+import { db, storage } from "@/firebase/firebase";
 import {
   collection,
   addDoc,
@@ -9,8 +9,8 @@ import {
   updateDoc,
   DocumentData,
 } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useState, useEffect } from "react";
-
 interface Question {
   id: string;
   questionTitle: string;
@@ -18,6 +18,7 @@ interface Question {
   questionPoints: number;
   answers: string[];
   correctAnswer: number;
+  photoURL?: string; // New field for photo URL
   [key: string]: any;
 }
 
@@ -51,6 +52,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
         questionPoints: 0,
         answers: [""],
         correctAnswer: 0,
+        photoURL: "", // New field for photo URL
       },
     ],
   });
@@ -172,13 +174,55 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
     });
   };
 
+  const handlePhotoUpload = async (
+    questionIndex: number,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    try {
+      const file = event.target.files?.[0];
+
+      if (file) {
+        const photoRef = ref(storage, `quizzes/photos`);
+
+        const photoSnapshot = await uploadBytes(photoRef, file);
+
+        const photoURL = await getDownloadURL(photoSnapshot.ref);
+        let updatedQuiz = { ...currentQuiz };
+        updatedQuiz.questions[questionIndex].photoURL = photoURL;
+        setCurrentQuiz(updatedQuiz);
+      }
+    } catch (error) {
+      console.error("Error uploading photo:", error);
+    }
+  };
+
+  const processText = (text: string): string => {
+    let processedText = text;
+
+    // Replace _2 with subscript 2
+    processedText = processedText.replace(/_([0-9])/g, (_, number) => {
+      return `<sub>${number}</sub>`;
+    });
+
+    // Replace -> with arrow
+    processedText = processedText.replace(/->/g, "→");
+
+    // Replace →/ with ⇄
+    processedText = processedText.replace(/(→\/)/g, "⇄");
+
+    return processedText;
+  };
+
   const handleQuestionChange = (
     questionIndex: number,
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     let updatedQuiz = { ...currentQuiz };
+
+    const rawText = event.target.value;
+    const processedText = processText(rawText);
     updatedQuiz.questions[questionIndex][event.target.name] =
-      event.target.type === "number" ? +event.target.value : event.target.value;
+      event.target.type === "number" ? +processedText : processedText;
     setCurrentQuiz(updatedQuiz);
   };
 
@@ -188,8 +232,10 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     let updatedQuiz = { ...currentQuiz };
-    updatedQuiz.questions[questionIndex].answers[answerIndex] =
-      event.target.value;
+    const rawText = event.target.value;
+    const processedText = processText(rawText);
+
+    updatedQuiz.questions[questionIndex].answers[answerIndex] = processedText;
     setCurrentQuiz(updatedQuiz);
   };
 
@@ -229,6 +275,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
             const questionRef = doc(questionsRef, questionId);
             await updateDoc(questionRef, {
               questionTitle: question.questionTitle,
+              photoURL: question.photoURL,
               questionTime: question.questionTime,
               possibleAnswers: question.answers.length,
               answers: question.answers.map((answer) => answer),
@@ -236,8 +283,9 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
               questionPoints: question.questionPoints,
             });
           } else {
-            const newQuestionRef = await addDoc(questionsRef, {
+            await addDoc(questionsRef, {
               questionTitle: question.questionTitle,
+              photoURL: question.photoURL,
               questionTime: question.questionTime,
               possibleAnswers: question.answers.length,
               answers: question.answers.map((answer) => answer),
@@ -262,6 +310,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
         for (const question of currentQuiz.questions) {
           await addDoc(collection(db, `quizzes/${quizId}/questions`), {
             questionTitle: question.questionTitle,
+            photoURL: question.photoURL,
             questionTime: question.questionTime,
             possibleAnswers: question.answers.length,
             answers: question.answers.map((answer) => answer),
@@ -415,6 +464,20 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
                   value={question.questionTitle}
                   type="text"
                   onChange={(e) => handleQuestionChange(questionIndex, e)}
+                  className="w-full border p-2"
+                />
+              </div>
+              <div className="mb-2">
+                <label
+                  htmlFor={`photo-upload-${questionIndex}`}
+                  className="block font-bold mb-2"
+                >
+                  Качи снимка
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handlePhotoUpload(questionIndex, e)}
                   className="w-full border p-2"
                 />
               </div>
