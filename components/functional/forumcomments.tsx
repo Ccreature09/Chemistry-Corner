@@ -23,7 +23,7 @@ interface Comment {
   createdAt: Timestamp;
 }
 
-export default function BlogComments({
+export default function ForumComments({
   articleId,
   isAdmin,
 }: {
@@ -115,7 +115,6 @@ export default function BlogComments({
           createdAt: Timestamp.now(),
         });
 
-        // Fetch all comments again after submitting
         fetchAllComments();
 
         setCommentContent("");

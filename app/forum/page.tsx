@@ -15,9 +15,9 @@ import { onAuthStateChanged, User } from "firebase/auth";
 import { auth, db } from "@/firebase/firebase";
 import { Navbar } from "@/components/functional/navbar";
 import { Footer } from "@/components/functional/footer";
-import BlogForm from "@/components/functional/blogform";
+import ForumForm from "@/components/functional/forumform";
 import { Input } from "@/components/ui/input";
-import BlogComments from "@/components/functional/blogcomments";
+import ForumComments from "@/components/functional/forumcomments";
 import { Button } from "@/components/ui/button";
 
 interface Article {
@@ -72,21 +72,21 @@ export default function Page() {
     });
   }, []);
 
-  const handleBlogDelete = async (articleId: string) => {
+  const handleForumDelete = async (articleId: string) => {
     try {
       await deleteDoc(doc(db, "articles", articleId));
       setArticles((prevArticles) =>
         prevArticles.filter((article) => article.id !== articleId)
       );
     } catch (error) {
-      console.error("Error deleting blog: ", error);
+      console.error("Error deleting forum: ", error);
     }
   };
 
   const handleSearch = async () => {
     const lowercaseQuery = searchQuery.toLowerCase();
-    const blogRef = collection(db, "articles");
-    const q = query(blogRef, where("queryTitle", ">=", lowercaseQuery));
+    const forumRef = collection(db, "articles");
+    const q = query(forumRef, where("queryTitle", ">=", lowercaseQuery));
 
     try {
       const querySnapshot = await getDocs(q);
@@ -165,16 +165,16 @@ export default function Page() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             {user ? (
-              <BlogForm />
+              <ForumForm />
             ) : (
               <div className="dark:bg-white  dark:text-black text-sm text-white bg-slate-900  w-full md:w-1/6 text-center my-auto p-2 font-semibold rounded-md">
-                Регистрирай се за да създадеш блог
+                Регистрирай се за да създадеш публикация
               </div>
             )}
           </div>
           {searchQuery.length < 2 && (
             <>
-              <h2 className="text-3xl font-bold mt-6">Скорошни блогове</h2>
+              <h2 className="text-3xl font-bold mt-6">Скорошни публикации</h2>
 
               {articles.map((article, index) => (
                 <div
@@ -183,10 +183,10 @@ export default function Page() {
                 >
                   {user && (user.uid === article.uid || isAdmin) && (
                     <Button
-                      onClick={() => handleBlogDelete(article.id)}
+                      onClick={() => handleForumDelete(article.id)}
                       className="cursor-pointer mb-3 w-full bg-red-500"
                     >
-                      Изтрий блог
+                      Изтрий публикация
                     </Button>
                   )}
 
@@ -211,8 +211,8 @@ export default function Page() {
                   </p>
                   <p className="text-lg mt-2">{article.content}</p>
 
-                  {/* Integrate BlogComments component for each article */}
-                  <BlogComments articleId={article.id} isAdmin={isAdmin} />
+                  {/* Integrate forumComments component for each article */}
+                  <ForumComments articleId={article.id} isAdmin={isAdmin} />
                 </div>
               ))}
             </>
@@ -240,8 +240,8 @@ export default function Page() {
                   </p>
                   <p className="text-lg mt-2">{article.content}</p>
 
-                  {/* Integrate BlogComments component for each article */}
-                  <BlogComments articleId={article.id} isAdmin />
+                  {/* Integrate forumComments component for each article */}
+                  <ForumComments articleId={article.id} isAdmin />
                 </div>
               ))}
             </>

@@ -22,7 +22,7 @@ interface Article {
   createdAt: Timestamp;
 }
 
-export const Blogmod = () => {
+export const ForumMod = () => {
   const [approvedArticles, setApprovedArticles] = useState<Article[]>([]);
   const [pendingArticles, setPendingArticles] = useState<Article[]>([]);
 
@@ -78,9 +78,7 @@ export const Blogmod = () => {
     updateDoc(articleRef, {
       status: "approved",
     })
-      .then(() => {
-        // Handle the approval success, you can update the UI as needed
-      })
+      .then(() => {})
       .catch((error) => {
         console.error("Error approving document: ", error);
       });
@@ -108,65 +106,70 @@ export const Blogmod = () => {
 
   return (
     <div className="p-4 space-y-4">
-      <div>
-        <h2 className="text-2xl font-semibold">Pending Articles</h2>
-        <ul className="space-y-4">
-          {pendingArticles.map((article, index) => (
-            <li
-              key={index}
-              className="bg-white p-4 shadow-md rounded-lg flex justify-between items-center space-x-4"
-            >
-              <div>
-                <p className="text-4xl font-bold mb-2">
-                  Title: {article.title}
-                </p>
-                <div className="flex mb-2">
-                  <Avatar>
-                    <AvatarImage src={article.pfp} alt={article.author} />
-                    <AvatarFallback>CN</AvatarFallback>
-                  </Avatar>
-                  <p className="text-xl font-semibold my-auto mx-3 flex">
-                    {article.author}
+      {pendingArticles.length > 0 && (
+        <div>
+          <h2 className="text-2xl font-semibold">
+            Публикации изчакващи удобрение
+          </h2>
+          <ul className="space-y-4">
+            {pendingArticles.map((article, index) => (
+              <li
+                key={index}
+                className="bg-white p-4 shadow-md rounded-lg flex mt-3 justify-between items-center space-x-4"
+              >
+                <div>
+                  <p className="text-2xl md:text-4xl font-bold mb-2">
+                    {article.title}
                   </p>
-                </div>
+                  <div className="flex mb-2">
+                    <Avatar>
+                      <AvatarImage src={article.pfp} alt={article.author} />
+                      <AvatarFallback>CN</AvatarFallback>
+                    </Avatar>
+                    <p className="text-xl font-semibold my-auto mx-3 flex">
+                      {article.author}
+                    </p>
+                  </div>
 
-                <p className="mb-2 text-lg">{article.content}</p>
-                <p>Date Submitted: {formatDate(article.createdAt)}</p>
-              </div>
-              <div className="flex items-center space-x-4">
-                <Button
-                  onClick={() => approveArticle(article.id)}
-                  className="bg-green-500 text-white px-4 py-2 rounded-lg hover-bg-green-600"
-                >
-                  Approve
-                </Button>
-                <Button
-                  onClick={() => deleteArticle(article.id)}
-                  className="bg-red-500 text-white px-4 py-2 rounded-lg hover-bg-red-600"
-                >
-                  Delete
-                </Button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+                  <p className="mb-2 text-lg">{article.content}</p>
+                  <p>Дата: {formatDate(article.createdAt)}</p>
+
+                  <div className="flex-col items-center space-x-4 mt-5">
+                    <Button
+                      onClick={() => approveArticle(article.id)}
+                      className="bg-green-500 text-white px-4 py-2 rounded-lg hover-bg-green-600"
+                    >
+                      Удобри
+                    </Button>
+                    <Button
+                      onClick={() => deleteArticle(article.id)}
+                      className="bg-red-500 text-white px-4 py-2 rounded-lg hover-bg-red-600"
+                    >
+                      Изтрий
+                    </Button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div>
-        <h2 className="text-2xl font-semibold">Approved Articles</h2>
+        <h2 className="text-2xl font-semibold">Удобрени публикации</h2>
         <ul className="space-y-4">
           {approvedArticles.map((article, index) => (
             <li
               key={index}
-              className="bg-white p-4 shadow-md rounded-lg flex justify-between items-center space-x-4"
+              className="bg-white p-4 shadow-md rounded-lg flex justify-between items-center mt-3 space-x-4"
             >
-              <div>
-                <p className="text-4xl font-bold mb-2">
-                  Title: {article.title}
+              <div className="w-full break-words">
+                <p className="text-2xl md:text-4xl font-bold mb-2">
+                  {article.title}
                 </p>
                 <div className="flex mb-2">
                   <Avatar>
                     <AvatarImage src={article.pfp} alt={article.author} />
-                    <AvatarFallback>CN</AvatarFallback>
                   </Avatar>
                   <p className="text-xl font-semibold my-auto mx-3 flex">
                     {article.author}
@@ -174,15 +177,15 @@ export const Blogmod = () => {
                 </div>
 
                 <p className="mb-2 text-lg">{article.content}</p>
-                <p>Date Submitted: {formatDate(article.createdAt)}</p>
-              </div>
-              <div className="flex items-center space-x-4">
-                <Button
-                  onClick={() => deleteArticle(article.id)}
-                  className="bg-red-500 text-white px-4 py-2 rounded-lg hover-bg-red-600"
-                >
-                  Delete
-                </Button>
+                <p>Дата: {formatDate(article.createdAt)}</p>
+                <div className="flex items-center space-x-4 mt-5">
+                  <Button
+                    onClick={() => deleteArticle(article.id)}
+                    className="bg-red-500 text-white px-4 py-2 rounded-lg hover-bg-red-600"
+                  >
+                    Изтрий
+                  </Button>
+                </div>
               </div>
             </li>
           ))}

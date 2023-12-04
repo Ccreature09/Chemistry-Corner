@@ -148,9 +148,9 @@ export const Navbar = () => {
                   Календар
                 </DropdownMenuItem>
               </Link>
-              <Link href="/blog">
+              <Link href="/forum">
                 <DropdownMenuItem className="cursor-pointer">
-                  Блог
+                  Форум
                 </DropdownMenuItem>
               </Link>
               <Link href="/plans">
@@ -350,9 +350,9 @@ export const Navbar = () => {
                 </Link>
               </NavigationMenuItem>
               <NavigationMenuItem>
-                <Link href="/blog" legacyBehavior passHref>
+                <Link href="/forum" legacyBehavior passHref>
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Блог
+                    Форум
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>

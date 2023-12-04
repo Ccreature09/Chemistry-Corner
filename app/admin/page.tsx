@@ -6,7 +6,7 @@ import { auth } from "@/firebase/firebase";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { Blogmod } from "@/components/functional/blogmod";
+import { ForumMod } from "@/components/functional/forummod";
 import EmbedForm from "@/components/functional/EmbedForm";
 import FetchEmbeds from "@/components/functional/FetchEmbeds";
 import PlanForm from "@/components/functional/planform";
@@ -41,9 +41,7 @@ export default function AdminDashboard() {
           <div className="container mx-auto p-4">
             <Tabs defaultValue="Blog Moderation">
               <TabsList className="w-full mb-5 overflow-x-auto">
-                <TabsTrigger value="Blog Moderation">
-                  Блог Управление
-                </TabsTrigger>
+                <TabsTrigger value="forum">Форум</TabsTrigger>
                 <TabsTrigger value="tests">Тестове</TabsTrigger>
                 <TabsTrigger value="games">Игри</TabsTrigger>
                 <TabsTrigger value="presentations">Презентации</TabsTrigger>
@@ -57,8 +55,8 @@ export default function AdminDashboard() {
 
                 <TabsTrigger value="settings">Настройки</TabsTrigger>
               </TabsList>
-              <TabsContent value="Blog Moderation">
-                <Blogmod />
+              <TabsContent value="forum">
+                <ForumMod />
               </TabsContent>
               <TabsContent value="tests">
                 <Tabs defaultValue="grade-8">

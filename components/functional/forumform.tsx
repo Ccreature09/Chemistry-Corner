@@ -28,7 +28,7 @@ const formSchema = z.object({
   content: z.string(),
 });
 
-export default function BlogForm() {
+export default function ForumForm() {
   const [user, setUser] = useState<User | null>(null);
   const [queryTitle, setQueryTitle] = useState("");
 
@@ -73,12 +73,12 @@ export default function BlogForm() {
     <>
       <Dialog>
         <DialogTrigger className="dark:bg-white  dark:text-black text-sm text-white bg-slate-900 dark:hover:bg-slate-50/90 hover:bg-slate-900/90 w-full md:w-1/6  p-2 font-semibold rounded-md">
-          Създай блог
+          Създай публикация
         </DialogTrigger>
 
         <DialogContent className="w-5/6 rounded-lg">
           <Form {...form}>
-            <p className="text-5xl font-black mb-8">Блог</p>
+            <p className="text-5xl font-black mb-8">Публикация</p>
 
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <div className="flex flex-col gap-3 ">
@@ -124,7 +124,7 @@ export default function BlogForm() {
                 />
               </div>
               <p className="text-xl text-center font-semibold mb-8">
-                Всчики блогове минават през администратор преди публикуване!
+                Всчики публикации минават през администратор преди публикуване!
               </p>
 
               <DialogClose asChild>
@@ -133,7 +133,7 @@ export default function BlogForm() {
                   type="submit"
                   className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-700"
                 >
-                  Submit Blog
+                  Изпрати публикация
                 </Button>
               </DialogClose>
             </form>
