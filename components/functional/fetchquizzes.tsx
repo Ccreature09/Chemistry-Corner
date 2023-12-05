@@ -2,11 +2,10 @@ import React, { useState, useEffect } from "react";
 import { db } from "@/firebase/firebase";
 import {
   collection,
-  getDocs,
   deleteDoc,
   doc,
   updateDoc,
-  setDoc,
+  onSnapshot,
 } from "firebase/firestore";
 import { Quiz } from "@/interfaces";
 import { Button } from "../ui/button";
@@ -19,26 +18,22 @@ const FetchQuizzes: React.FC<FetchQuizzesProps> = ({ onEditQuiz }) => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
 
   useEffect(() => {
-    const fetchQuizzes = async () => {
-      try {
-        const quizzesRef = collection(db, "quizzes");
-        const quizSnapshot = await getDocs(quizzesRef);
+    const quizzesRef = collection(db, "quizzes");
 
-        const quizzesData: Quiz[] = quizSnapshot.docs.map((doc) => {
-          const data = doc.data() as Quiz;
-          return {
-            id: doc.id,
-            ...data,
-          };
-        });
+    // Subscribe to real-time updates using onSnapshot
+    const unsubscribe = onSnapshot(quizzesRef, (snapshot) => {
+      const quizzesData: Quiz[] = snapshot.docs.map((doc) => {
+        const data = doc.data() as Quiz;
+        return {
+          id: doc.id,
+          ...data,
+        };
+      });
 
-        setQuizzes(quizzesData);
-      } catch (error) {
-        console.error("Error fetching quizzes:", error);
-      }
-    };
+      setQuizzes(quizzesData);
+    });
 
-    fetchQuizzes();
+    return () => unsubscribe();
   }, []);
 
   const handleDeleteQuiz = async (quizId: string) => {
