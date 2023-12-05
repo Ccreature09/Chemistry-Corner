@@ -18,7 +18,7 @@ interface Question {
   questionPoints: number;
   answers: string[];
   correctAnswer: number;
-  photoURL?: string; // New field for photo URL
+  photoURL?: string | null;
   [key: string]: any;
 }
 
@@ -183,12 +183,16 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
 
       if (file) {
         const photoRef = ref(storage, `quizzes/photos`);
-
         const photoSnapshot = await uploadBytes(photoRef, file);
-
         const photoURL = await getDownloadURL(photoSnapshot.ref);
+
         let updatedQuiz = { ...currentQuiz };
         updatedQuiz.questions[questionIndex].photoURL = photoURL;
+        setCurrentQuiz(updatedQuiz);
+      } else {
+        // If no file selected, set photoURL to null
+        let updatedQuiz = { ...currentQuiz };
+        updatedQuiz.questions[questionIndex].photoURL = null;
         setCurrentQuiz(updatedQuiz);
       }
     } catch (error) {
@@ -275,7 +279,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
             const questionRef = doc(questionsRef, questionId);
             await updateDoc(questionRef, {
               questionTitle: question.questionTitle,
-              photoURL: question.photoURL,
+              photoURL: question.photoURL || null,
               questionTime: question.questionTime,
               possibleAnswers: question.answers.length,
               answers: question.answers.map((answer) => answer),
@@ -285,7 +289,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
           } else {
             await addDoc(questionsRef, {
               questionTitle: question.questionTitle,
-              photoURL: question.photoURL,
+              photoURL: question.photoURL || null,
               questionTime: question.questionTime,
               possibleAnswers: question.answers.length,
               answers: question.answers.map((answer) => answer),
@@ -310,7 +314,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
         for (const question of currentQuiz.questions) {
           await addDoc(collection(db, `quizzes/${quizId}/questions`), {
             questionTitle: question.questionTitle,
-            photoURL: question.photoURL,
+            photoURL: question.photoURL || null,
             questionTime: question.questionTime,
             possibleAnswers: question.answers.length,
             answers: question.answers.map((answer) => answer),
