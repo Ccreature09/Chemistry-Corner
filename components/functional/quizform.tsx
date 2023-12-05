@@ -1,4 +1,8 @@
+import { useState, useEffect, useRef } from "react";
 import { db, storage } from "@/firebase/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   collection,
   addDoc,
@@ -9,8 +13,7 @@ import {
   updateDoc,
   DocumentData,
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { useState, useEffect } from "react";
+
 interface Question {
   id: string;
   questionTitle: string;
@@ -18,7 +21,7 @@ interface Question {
   questionPoints: number;
   answers: string[];
   correctAnswer: number;
-  photoURL?: string | null;
+  photoURL?: string;
   [key: string]: any;
 }
 
@@ -38,6 +41,7 @@ interface DynamicFormProps {
 
 const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
   const [editingId, setEditingId] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [currentQuiz, setCurrentQuiz] = useState<Quiz>({
     quizName: "",
     questionIntermission: 0,
@@ -100,6 +104,10 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
     }
   }, [editingId]);
 
+  const cancelEdit = () => {
+    setEditingId("");
+    resetForm();
+  };
   const addQuestionRow = () => {
     let updatedQuiz = { ...currentQuiz };
     updatedQuiz.questions.push({
@@ -192,7 +200,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
       } else {
         // If no file selected, set photoURL to null
         let updatedQuiz = { ...currentQuiz };
-        updatedQuiz.questions[questionIndex].photoURL = null;
+        updatedQuiz.questions[questionIndex].photoURL = undefined;
         setCurrentQuiz(updatedQuiz);
       }
     } catch (error) {
@@ -332,6 +340,12 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
     }
   };
 
+  const deleteImage = (questionIndex: number) => {
+    let updatedQuiz = { ...currentQuiz };
+    updatedQuiz.questions[questionIndex].photoURL = undefined;
+    setCurrentQuiz(updatedQuiz);
+  };
+
   const isValidForm = () => {
     // Check for blank fields in quiz details
     const quizDetailsFields = ["quizName", "questionIntermission", "quizCode"];
@@ -377,19 +391,26 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
           questionPoints: 0,
           answers: [""],
           correctAnswer: 0,
+          photoURL: undefined,
         },
       ],
     });
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // Reset the input value to an empty string
+      fileInputRef.current.defaultValue = ""; // Reset the default value to an empty string
+      console.log(fileInputRef.current.value);
+    }
   };
 
   return (
     <div className="container mx-auto my-10 p-6 bg-gray-100 shadow-md">
       <div className="mb-8 p-4 border rounded">
         <div className="mb-4">
-          <label htmlFor="quizName" className="block font-bold mb-2">
+          <Label htmlFor="quizName" className="block font-bold mb-2">
             Quiz име
-          </label>
-          <input
+          </Label>
+          <Input
             name="quizName"
             value={currentQuiz.quizName}
             type="text"
@@ -398,13 +419,13 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
           />
         </div>
         <div className="mb-4">
-          <label
+          <Label
             htmlFor="questionIntermission"
             className="block font-bold mb-2"
           >
             Пауза между въпросите (секунди)
-          </label>
-          <input
+          </Label>
+          <Input
             name="questionIntermission"
             inputMode="numeric"
             value={currentQuiz.questionIntermission}
@@ -414,10 +435,10 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="quizCode" className="block font-bold mb-2">
+          <Label htmlFor="quizCode" className="block font-bold mb-2">
             Quiz код
-          </label>
-          <input
+          </Label>
+          <Input
             name="quizCode"
             value={currentQuiz.quizCode}
             inputMode="numeric"
@@ -427,10 +448,10 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
           />
         </div>
         <div className="mb-4">
-          <label htmlFor="hasBonusPoints" className="block font-bold mb-2">
+          <Label htmlFor="hasBonusPoints" className="block font-bold mb-2">
             Има бонус точки (спрямо времето)
-          </label>
-          <input
+          </Label>
+          <Input
             name="hasBonusPoints"
             type="checkbox"
             checked={currentQuiz.hasBonusPoints}
@@ -439,10 +460,10 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
         </div>
         {currentQuiz.hasBonusPoints && (
           <div className="mb-4">
-            <label htmlFor="maxBonusPoints" className="block font-bold mb-2">
+            <Label htmlFor="maxBonusPoints" className="block font-bold mb-2">
               Максимален брой бонус точки
-            </label>
-            <input
+            </Label>
+            <Input
               name="maxBonusPoints"
               inputMode="numeric"
               type="number"
@@ -457,13 +478,13 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
           currentQuiz.questions.map((question, questionIndex) => (
             <div key={questionIndex} className="mb-4 border p-4 rounded">
               <div className="mb-2">
-                <label
+                <Label
                   htmlFor={`questionTitle-${questionIndex}`}
                   className="block font-bold mb-2"
                 >
                   Въпрос
-                </label>
-                <input
+                </Label>
+                <Input
                   name="questionTitle"
                   value={question.questionTitle}
                   type="text"
@@ -472,27 +493,44 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
                 />
               </div>
               <div className="mb-2">
-                <label
+                <Label
                   htmlFor={`photo-upload-${questionIndex}`}
                   className="block font-bold mb-2"
                 >
                   Качи снимка
-                </label>
-                <input
+                </Label>
+                <Input
+                  key={editingId}
                   type="file"
+                  ref={fileInputRef}
                   accept="image/*"
                   onChange={(e) => handlePhotoUpload(questionIndex, e)}
                   className="w-full border p-2"
                 />
               </div>
+              {currentQuiz.questions[questionIndex].photoURL && (
+                <div className="my-3">
+                  <img
+                    src={currentQuiz.questions[questionIndex].photoURL}
+                    alt={`Question ${questionIndex + 1}`}
+                    className="max-w-full max-h-32"
+                  />
+                  <button
+                    onClick={() => deleteImage(questionIndex)}
+                    className="mt-2 bg-red-500 text-white px-2 py-1 rounded"
+                  >
+                    Изтрий снимката
+                  </button>
+                </div>
+              )}
               <div className="mb-2">
-                <label
+                <Label
                   htmlFor={`questionTime-${questionIndex}`}
                   className="block font-bold mb-2"
                 >
                   Време за решаване (секунди)
-                </label>
-                <input
+                </Label>
+                <Input
                   name="questionTime"
                   inputMode="numeric"
                   value={question.questionTime}
@@ -502,13 +540,13 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
                 />
               </div>
               <div className="mb-2">
-                <label
+                <Label
                   htmlFor={`questionPoints-${questionIndex}`}
                   className="block font-bold mb-2"
                 >
                   Точки
-                </label>
-                <input
+                </Label>
+                <Input
                   name="questionPoints"
                   inputMode="numeric"
                   value={question.questionPoints}
@@ -519,13 +557,13 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
               </div>
               {question.answers.map((answer, answerIndex) => (
                 <div key={answerIndex} className="flex items-center mb-2">
-                  <label
+                  <Label
                     htmlFor={`answer-${questionIndex}-${answerIndex}`}
                     className="block font-bold mr-2"
                   >
                     Отговор
-                  </label>
-                  <input
+                  </Label>
+                  <Input
                     name="answer"
                     type="text"
                     value={answer}
@@ -543,12 +581,12 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
                 </div>
               ))}
               <div className="mb-2">
-                <label
+                <Label
                   htmlFor={`correct-answer-${questionIndex}`}
                   className="block font-bold mb-2"
                 >
                   Правилен отговор
-                </label>
+                </Label>
                 <select
                   name="correctAnswer"
                   value={question.correctAnswer}
@@ -586,10 +624,19 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
 
       <button
         onClick={saveQuizData}
-        className="bg-purple-500 text-white px-4 py-2 rounded"
+        className="bg-purple-500 text-white px-4 py-2 mx-2 rounded"
       >
         {editingId ? "Редактирай Quiz" : "Създай Quiz"}
       </button>
+
+      {editingId && (
+        <button
+          onClick={cancelEdit}
+          className="bg-red-500 text-white mx-2 px-4 py-2 rounded"
+        >
+          Спри редакцията
+        </button>
+      )}
     </div>
   );
 };
