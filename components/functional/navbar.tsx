@@ -114,7 +114,7 @@ export const Navbar = () => {
             </Link>
           </div>
           <DropdownMenu>
-            <DropdownMenuTrigger className="xl:hidden flex items-center ">
+            <DropdownMenuTrigger className="xl:hidden flex items-center mx-12 ">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -386,7 +386,7 @@ export const Navbar = () => {
                 </>
               ) : user && profileImageUrl ? (
                 profileImageUrl && (
-                  <div className=" flex flex-col justify-center mx-10">
+                  <div className=" flex flex-col justify-between mx-5 md:mx-10">
                     <Avatar className="flex mx-auto">
                       <AvatarImage src={profileImageUrl} alt="User" />
                       <AvatarFallback>{user.displayName}</AvatarFallback>
