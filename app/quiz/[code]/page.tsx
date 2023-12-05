@@ -685,7 +685,7 @@ export default function Page({ params }: { params: { code: string } }) {
                         return (
                           <Button
                             key={index}
-                            className={`w-4/5 h-32 px-36 mx-auto rounded text-xl text-white font-bold ${
+                            className={`w-4/5 h-full px-36 mx-auto rounded text-xl text-white font-bold ${
                               index ===
                                 currentQuiz?.questions[currentQuestionIndex]
                                   ?.correctAnswer && showAnswer
