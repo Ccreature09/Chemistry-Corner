@@ -84,6 +84,56 @@ export default function Page({ params }: { params: { code: string } }) {
   );
   const [participantName, setParticipantName] = useState("");
   const router = useRouter();
+  const [liveLeaderboard, setLiveLeaderboard] = useState<UserScore[]>([]);
+
+  useEffect(() => {
+    // Fetch participants and update live leaderboard
+    const fetchParticipantsAndLeaderboard = async () => {
+      try {
+        const quizzesRef = collection(db, "quizzes");
+        const q = query(quizzesRef, where("quizCode", "==", Number(quizCode)));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+          console.error("Empty snapshot");
+          setLiveLeaderboard([]);
+        } else {
+          const quizRef = doc(db, "quizzes", querySnapshot.docs[0].id);
+          const unsubscribe = onSnapshot(quizRef, (docSnapshot) => {
+            const data = docSnapshot.data();
+            const participantsObj: Record<string, Participant> =
+              data?.participants;
+
+            const participantsArray =
+              convertParticipantsMapToArray(participantsObj);
+            setParticipants(participantsArray);
+
+            // Update live leaderboard
+            const scoresData = Object.values(participantsObj);
+            const topScores = scoresData
+              .sort((a, b) => b.points - a.points)
+              .map((userScore) => ({
+                name: userScore.name,
+                points: userScore.points,
+              }));
+
+            setLiveLeaderboard(topScores);
+          });
+
+          return () => unsubscribe();
+        }
+      } catch (error) {
+        console.error("Error fetching participants:", error);
+      }
+    };
+
+    fetchParticipantsAndLeaderboard();
+
+    return () => {
+      // Cleanup logic if needed
+    };
+  }, [quizCode]);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, function (user) {
       if (user && adminArray.includes(user.uid)) {
@@ -579,6 +629,83 @@ export default function Page({ params }: { params: { code: string } }) {
     }
   };
 
+  const LiveLeaderboard = () => {
+    return (
+      <div className="text-center w-3/5">
+        <h2 className="text-4xl md:text-7xl font-bold mb-32">Класация</h2>
+        <div className="flex gap-2">
+          {/* Display Podium - Silver, Gold, Bronze */}
+          {liveLeaderboard.length >= 2 && (
+            <div className="w-1/3 h-[300px] mt-[100px] bg-slate-400 text-white pt-5">
+              <p className="text-xl md:text-3xl m-2 font-bold">2</p>
+              <p className="text-2xl md:text-4xl font-semibold break-words">
+                {liveLeaderboard[1].name}
+              </p>
+              <p className="text-xl md:text-2xl mt-4">
+                {liveLeaderboard[1].points} точки
+              </p>
+            </div>
+          )}
+
+          {liveLeaderboard.length >= 1 && (
+            <div className="w-1/3 h-[400px] bg-yellow-300 text-white pt-5">
+              <p className="text-xl md:text-3xl m-2 font-bold">1</p>
+              <p className="text-2xl md:text-4xl font-semibold break-words">
+                {liveLeaderboard[0].name}
+              </p>
+              <p className="text-xl md:text-2xl mt-4">
+                {liveLeaderboard[0].points} точки
+              </p>
+            </div>
+          )}
+
+          {liveLeaderboard.length >= 3 && (
+            <div className="w-1/3 h-[200px] mt-[200px] bg-orange-400 text-white pt-5">
+              <p className="text-xl md:text-3xl m-2 font-bold">3</p>
+              <p className="text-2xl md:text-4xl font-semibold break-words">
+                {liveLeaderboard[2].name}
+              </p>
+              <p className="text-xl md:text-2xl mt-4">
+                {liveLeaderboard[2].points} точки
+              </p>
+            </div>
+          )}
+        </div>
+        {liveLeaderboard.length > 3 && (
+          <div className="mt-5">
+            <table className="table-auto w-full">
+              <thead>
+                <tr>
+                  <th className="px-4 py-2">#</th>
+                  <th className="px-4 py-2">Име</th>
+                  <th className="px-4 py-2">Точки</th>
+                </tr>
+              </thead>
+              <tbody>
+                {liveLeaderboard.slice(3).map((user, index) => (
+                  <tr key={index}>
+                    <td className="border px-4 py-2">{index + 4}</td>
+                    <td className="border px-4 py-2">{user.name}</td>
+                    <td className="border px-4 py-2">{user.points}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {isAdmin && (
+          <Button
+            className="bg-red-500 text-white py-2 px-4 mt-5 rounded"
+            onClick={handleResetQuiz}
+          >
+            Рестартирай Quiz
+          </Button>
+        )}
+      </div>
+    );
+  };
+
   return (
     <>
       <Navbar />
@@ -642,23 +769,27 @@ export default function Page({ params }: { params: { code: string } }) {
           ) : (
             <>
               {/* Question Timer */}
-              {time !== null && !showAnswer && !isQuizEnded && (
-                <div className="flex justify-center items-center bg-blue-300 w-36 h-36 rounded-full mx-auto my-5 md:w-20 mb-16 md:h-20">
+              {time !== null && !showAnswer && !isQuizEnded && !isAdmin && (
+                <div className="flex justify-center items-center bg-blue-300 w-36 h-36 rounded-full mx-auto my-3 md:w-20 mb-16 md:h-20">
                   <p className="text-5xl font-semibold md:text-5xl text-white">
                     {time}
                   </p>
                 </div>
               )}
               {/* Intermission Timer */}
-              {intermissionTime !== null && showAnswer && !isQuizEnded && (
-                <div className="text-center mt-4">
-                  <p className="text-2xl mb-5 font-bold">
-                    Следващ въпрос след: {intermissionTime}
-                  </p>
-                </div>
-              )}
+              {intermissionTime !== null &&
+                showAnswer &&
+                !isQuizEnded &&
+                !isAdmin && (
+                  <div className="text-center mt-4">
+                    <p className="text-2xl mb-5 font-bold">
+                      Следващ въпрос след: {intermissionTime}
+                    </p>
+                  </div>
+                )}
               {/* Questions and Answers */}
               {!isQuizEnded &&
+                !isAdmin &&
                 currentQuiz &&
                 currentQuiz.questions[currentQuestionIndex] && (
                   <div className="w-full">
@@ -702,19 +833,25 @@ export default function Page({ params }: { params: { code: string } }) {
                         );
                       })}
                     </div>
+                    {/*   Correct Answer   */}
                     {currentQuiz &&
-                      currentQuiz.questions[currentQuestionIndex] &&
-                      showAnswer && (
-                        <div className="text-green-500 text-4xl w-full">
-                          Правилният отговор е{" "}
-                          {
-                            currentQuiz.questions[currentQuestionIndex].answers[
+                      currentQuiz.questions[currentQuestionIndex] && (
+                        <div className="   w-full">
+                          <p className="mx-2 text-green-500 text-4xl">
+                            Правилният отговор е:{" "}
+                          </p>
+                          <p className="font-bold text-3xl my-3 text-black underline">
+                            {
                               currentQuiz.questions[currentQuestionIndex]
-                                .correctAnswer
-                            ]
-                          }
+                                .answers[
+                                currentQuiz.questions[currentQuestionIndex]
+                                  .correctAnswer
+                              ]
+                            }
+                          </p>
+
                           <div className="text-center">
-                            <h3 className="text-3xl font-bold">
+                            <h3 className="text-3xl text-black font-bold">
                               Резултат: {score}
                             </h3>
                           </div>
@@ -725,6 +862,8 @@ export default function Page({ params }: { params: { code: string } }) {
             </>
           )}
         </div>
+
+        {isAdmin && !isWaitingLobby && <LiveLeaderboard />}
 
         {/* Leaderboard Display */}
         {isQuizEnded && (
