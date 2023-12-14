@@ -662,7 +662,7 @@ export default function Page({ params }: { params: { code: string } }) {
                 currentQuiz &&
                 currentQuiz.questions[currentQuestionIndex] && (
                   <div className="w-full">
-                    <h2 className="text-4xl md:text-6xl font-bold mb-5">
+                    <h2 className="text-3xl mx-8 text-left md:text-6xl font-bold mb-8">
                       {renderSubscripts(
                         currentQuiz.questions[currentQuestionIndex]
                           .questionTitle
