@@ -462,34 +462,6 @@ export default function Page({ params }: { params: { code: string } }) {
       updateParticipantScore(participantName, newScore);
     }
   };
-  const renderSubscripts = (text: string) => {
-    const subscriptMap: Record<string, string> = {
-      "0": "₀",
-      "1": "₁",
-      "2": "₂",
-      "3": "₃",
-      "4": "₄",
-      "5": "₅",
-      "6": "₆",
-      "7": "₇",
-      "8": "₈",
-      "9": "₉",
-    };
-
-    return text
-      .split(/<sub>([0-9]+)<\/sub>/g)
-      .map((part, index) => {
-        if (index % 2 === 1) {
-          return part.replace(
-            /[0-9]/g,
-            (match) => subscriptMap[match as keyof typeof subscriptMap] || match
-          );
-        } else {
-          return part;
-        }
-      })
-      .join("");
-  };
 
   async function handleEndOfQuiz() {
     setIsQuizEnded(true);
@@ -794,10 +766,10 @@ export default function Page({ params }: { params: { code: string } }) {
                 currentQuiz.questions[currentQuestionIndex] && (
                   <div className="w-full">
                     <h2 className="text-3xl mx-8 text-left md:text-6xl font-bold mb-8">
-                      {renderSubscripts(
+                      {
                         currentQuiz.questions[currentQuestionIndex]
                           .questionTitle
-                      )}
+                      }
                     </h2>
                     {currentQuiz.questions[currentQuestionIndex].photoURL && (
                       <img
@@ -828,14 +800,15 @@ export default function Page({ params }: { params: { code: string } }) {
                             onClick={() => handleAnswerClick(index)}
                             disabled={isAnswered || answersDisabled}
                           >
-                            {renderSubscripts(answer)}
+                            {answer}
                           </Button>
                         );
                       })}
                     </div>
                     {/*   Correct Answer   */}
                     {currentQuiz &&
-                      currentQuiz.questions[currentQuestionIndex] && (
+                      currentQuiz.questions[currentQuestionIndex] &&
+                      showAnswer && (
                         <div className="   w-full">
                           <p className="mx-2 text-green-500 text-4xl">
                             Правилният отговор е:{" "}
