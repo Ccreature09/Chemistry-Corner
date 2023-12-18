@@ -41,6 +41,7 @@ interface DynamicFormProps {
 
 const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
   const [editingId, setEditingId] = useState("");
+  const [formError, setFormError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [currentQuiz, setCurrentQuiz] = useState<Quiz>({
     quizName: "",
@@ -91,6 +92,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
             hasBonusPoints: quizData.hasBonusPoints,
             maxBonusPoints: quizData.maxBonusPoints,
           });
+          setFormError(null);
         } else {
           console.error("Quiz not found");
         }
@@ -344,12 +346,11 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
           });
         }
       }
-
-      alert("Quiz data saved successfully");
       setEditingId("");
       resetForm();
+      setFormError(null);
     } else {
-      alert("Form Invalid");
+      setFormError("Формата е невалидна. Моля, попълнете всички полета.");
     }
   };
 
@@ -634,7 +635,9 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
           Добави въпрос
         </button>
       </div>
-
+      {formError && (
+        <div className="mb-4 text-red-500 font-bold">{formError}</div>
+      )}
       <button
         onClick={saveQuizData}
         className="bg-purple-500 text-white px-4 py-2 mx-2 rounded"
