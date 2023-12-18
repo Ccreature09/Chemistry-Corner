@@ -39,14 +39,10 @@ interface Quiz {
   questionIntermission: number;
 }
 
-interface UserScore {
-  name: string;
-  points: number;
-}
-
 interface Participant {
   name: string;
   points: number;
+  hasAnswered: boolean;
 }
 
 const adminArray = [
@@ -70,7 +66,7 @@ export default function Page({ params }: { params: { code: string } }) {
   );
   const [score, setScore] = useState<number>(0);
   const [isAnswered, setIsAnswered] = useState<boolean>(false);
-  const [leaderboard, setLeaderboard] = useState<UserScore[]>([]);
+  const [leaderboard, setLeaderboard] = useState<Participant[]>([]);
   const [isQuizEnded, setIsQuizEnded] = useState<boolean>(false);
   const [isWaitingLobby, setIsWaitingLobby] = useState<boolean>(true);
   const [participants, setParticipants] = useState<Participant[]>();
@@ -84,7 +80,7 @@ export default function Page({ params }: { params: { code: string } }) {
   );
   const [participantName, setParticipantName] = useState("");
   const router = useRouter();
-  const [liveLeaderboard, setLiveLeaderboard] = useState<UserScore[]>([]);
+  const [liveLeaderboard, setLiveLeaderboard] = useState<Participant[]>([]);
 
   useEffect(() => {
     // Fetch participants and update live leaderboard
@@ -115,6 +111,7 @@ export default function Page({ params }: { params: { code: string } }) {
               .map((userScore) => ({
                 name: userScore.name,
                 points: userScore.points,
+                hasAnswered: userScore.hasAnswered,
               }));
 
             setLiveLeaderboard(topScores);
@@ -232,7 +229,7 @@ export default function Page({ params }: { params: { code: string } }) {
           const quizData = doc.data();
           const quizStarted = quizData.quizStarted;
           if (quizData.quizStarted) {
-            if (!isNameEntered) {
+            if (!isNameEntered && !isAdmin) {
               router.push("/quiz");
               return;
             }
@@ -291,6 +288,7 @@ export default function Page({ params }: { params: { code: string } }) {
         id,
         name: participant.name,
         points: participant.points,
+        hasAnswered: participant.hasAnswered,
       })
     );
 
@@ -441,6 +439,7 @@ export default function Page({ params }: { params: { code: string } }) {
     if (!isAnswered) {
       setSelectedAnswerIndex(index);
       setIsAnswered(true);
+      updateParticipantAnswerStatus(participantName, true);
 
       const newScore =
         index === currentQuiz?.questions[currentQuestionIndex]?.correctAnswer
@@ -459,8 +458,79 @@ export default function Page({ params }: { params: { code: string } }) {
           : score;
 
       setScore(newScore);
-      updateParticipantScore(participantName, newScore);
+      updateParticipantScore(participantName, newScore, true);
+      const allParticipantsAnswered = participants?.every(
+        (participant) => participant.hasAnswered
+      );
+
+      if (allParticipantsAnswered) {
+        // Set the current question timer to 2 seconds for all participants
+        setTime(2);
+
+        // Reset hasAnswered to false for all participants
+        resetParticipantsAnswerStatus();
+      }
     }
+  };
+
+  const updateParticipantAnswerStatus = async (
+    participantName: string,
+    hasAnswered: boolean
+  ) => {
+    // Update hasAnswered for the current participant
+    const updatedParticipants = participants?.map((participant) =>
+      participant.name === participantName
+        ? { ...participant, hasAnswered }
+        : participant
+    );
+
+    setParticipants(updatedParticipants);
+
+    // Update the Firebase Firestore document with the new participants data
+    await updateParticipantsInFirestore(updatedParticipants);
+  };
+
+  const resetParticipantsAnswerStatus = async () => {
+    // Reset hasAnswered to false for all participants
+    const resetParticipants = participants?.map((participant) => ({
+      ...participant,
+      hasAnswered: false,
+    }));
+
+    setParticipants(resetParticipants);
+
+    // Update the Firebase Firestore document with the new participants data
+    await updateParticipantsInFirestore(resetParticipants);
+  };
+
+  const updateParticipantsInFirestore = async (
+    updatedParticipants?: Participant[]
+  ) => {
+    try {
+      const quizzesRef = collection(db, "quizzes");
+      const q = query(quizzesRef, where("quizCode", "==", Number(quizCode)));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const quizRef = doc(db, "quizzes", querySnapshot.docs[0].id);
+        await updateDoc(quizRef, {
+          participants: participantsArrayToObject(updatedParticipants),
+        });
+      }
+    } catch (error) {
+      console.error("Error updating participants:", error);
+    }
+  };
+
+  const participantsArrayToObject = (participantsArray?: Participant[]) => {
+    return participantsArray?.reduce((acc, participant) => {
+      acc[participant.name] = {
+        name: participant.name,
+        points: participant.points,
+        hasAnswered: participant.hasAnswered,
+      };
+      return acc;
+    }, {} as Record<string, Participant>);
   };
 
   async function handleEndOfQuiz() {
@@ -473,7 +543,7 @@ export default function Page({ params }: { params: { code: string } }) {
       return;
     }
     const quizData = quizSnapshot.docs[0].data();
-    const participants = quizData.participants as Record<string, UserScore>;
+    const participants = quizData.participants as Record<string, Participant>;
     const scoresData = Object.values(participants);
     const topScores = scoresData
       .sort(function (a, b) {
@@ -484,12 +554,13 @@ export default function Page({ params }: { params: { code: string } }) {
         return {
           name: userScore.name,
           points: userScore.points,
+          hasAnswered: userScore.hasAnswered,
         };
       });
 
     setLeaderboard(topScores);
 
-    updateParticipantScore(participantName, score);
+    updateParticipantScore(participantName, score, false);
   }
 
   const handleNameSubmit = async () => {
@@ -523,6 +594,7 @@ export default function Page({ params }: { params: { code: string } }) {
         participantMap[participantId] = {
           name: participantName,
           points: 0,
+          hasAnswered: false,
         };
 
         await updateDoc(quizDocRef, {
@@ -537,7 +609,8 @@ export default function Page({ params }: { params: { code: string } }) {
 
   async function updateParticipantScore(
     participantName: string,
-    newScore: number
+    newScore: number,
+    hasAnswered: boolean = true
   ) {
     try {
       const quizzesRef = collection(db, "quizzes");
@@ -557,13 +630,13 @@ export default function Page({ params }: { params: { code: string } }) {
 
       const participantMap = quizDoc.data()?.participants || {};
 
-      const participantToUpdate = Object.values<UserScore>(participantMap).find(
-        (participant) => participant.name === participantName
-      );
+      const participantToUpdate = Object.values<Participant>(
+        participantMap
+      ).find((participant) => participant.name === participantName);
 
       if (participantToUpdate) {
         participantToUpdate.points = newScore;
-
+        participantToUpdate.hasAnswered = hasAnswered;
         await updateDoc(quizDocRef, {
           participants: participantMap,
         });
@@ -683,7 +756,7 @@ export default function Page({ params }: { params: { code: string } }) {
       <Navbar />
       <div className="flex flex-col justify-center items-center min-h-screen max-w-screen-lg mx-auto">
         <div className="text-center">
-          {isWaitingLobby ? (
+          {isWaitingLobby && !isAdmin ? (
             <div className="shadow-xl p-5 rounded-lg mx-5">
               <div>
                 {!isNameEntered && (
@@ -717,16 +790,6 @@ export default function Page({ params }: { params: { code: string } }) {
                     Изчакваме учител да започне Quiz-a...
                   </h2>
                 )}
-                {isAdmin && !isQuizEnded && !quizStarted && isNameEntered && (
-                  <>
-                    <Button
-                      className="bg-green-500 text-white py-2 px-4 mt-5 rounded"
-                      onClick={handleStartQuiz}
-                    >
-                      Започни Quiz
-                    </Button>
-                  </>
-                )}
               </div>
               <h3 className="text-2xl md:text-32xl font-bold underline mt-5">
                 Участници:
@@ -738,6 +801,34 @@ export default function Page({ params }: { params: { code: string } }) {
                   ))}
               </ul>
             </div>
+          ) : isWaitingLobby && isAdmin ? (
+            <>
+              <h1 className="font-bold text-4xl md:text-7xl mb-8 max-w-2xl mx-auto text-center break-words">
+                {currentQuiz?.quizName}
+              </h1>
+
+              {!isQuizEnded && !quizStarted && (
+                <>
+                  <Button
+                    className="bg-green-500 text-white py-2 px-4 mt-5 rounded"
+                    onClick={handleStartQuiz}
+                  >
+                    Започни Quiz
+                  </Button>
+                </>
+              )}
+              <div className="p-4 shadow-xl ">
+                <h3 className="text-2xl md:text-32xl font-bold underline mt-5">
+                  Участници:
+                </h3>
+                <ul className="text-xl md:text-2xl shadow-xl p-5 rounded-lg">
+                  {participants &&
+                    participants.map((participant, index) => (
+                      <li key={index}>{participant.name}</li>
+                    ))}
+                </ul>
+              </div>
+            </>
           ) : (
             <>
               {/* Question Timer */}
