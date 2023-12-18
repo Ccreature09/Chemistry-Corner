@@ -208,12 +208,25 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ editingQuizId }) => {
     }
   };
 
+  const subscriptMap: Record<string, string> = {
+    "0": "₀",
+    "1": "₁",
+    "2": "₂",
+    "3": "₃",
+    "4": "₄",
+    "5": "₅",
+    "6": "₆",
+    "7": "₇",
+    "8": "₈",
+    "9": "₉",
+  };
+
   const processText = (text: string): string => {
     let processedText = text;
 
     // Replace _2 with subscript 2
     processedText = processedText.replace(/_([0-9])/g, (_, number) => {
-      return `<sub>${number}</sub>`;
+      return subscriptMap[number] || number;
     });
 
     // Replace -> with arrow
