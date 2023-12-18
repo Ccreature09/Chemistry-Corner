@@ -16,6 +16,19 @@ interface FetchQuizzesProps {
 
 const FetchQuizzes: React.FC<FetchQuizzesProps> = ({ onEditQuiz }) => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  // Function to handle opening the delete modal
+  const handleOpenDeleteModal = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  // Function to handle closing the delete modal
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+  };
+
+  // Function to handle the actual delete action
 
   useEffect(() => {
     const quizzesRef = collection(db, "quizzes");
@@ -43,6 +56,7 @@ const FetchQuizzes: React.FC<FetchQuizzesProps> = ({ onEditQuiz }) => {
       // Refresh the quiz list after deletion
       const updatedQuizzes = quizzes.filter((quiz) => quiz.id !== quizId);
       setQuizzes(updatedQuizzes);
+      setIsDeleteModalOpen(false);
     } catch (error) {
       console.error("Error deleting quiz:", error);
     }
@@ -101,12 +115,72 @@ const FetchQuizzes: React.FC<FetchQuizzesProps> = ({ onEditQuiz }) => {
               Редактирай
             </Button>
 
-            <Button
-              className="mx-2 mt-2 bg-red-500"
-              onClick={() => handleDeleteQuiz(quiz.id)}
-            >
+            <Button className="bg-red-500" onClick={handleOpenDeleteModal}>
               Изтрий
             </Button>
+
+            {/* Delete Modal */}
+            {isDeleteModalOpen && (
+              <div className="fixed z-10 inset-0 overflow-y-auto">
+                <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                  <div
+                    className="fixed inset-0 transition-opacity"
+                    aria-hidden="true"
+                  >
+                    <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+                  </div>
+                  <span className="hidden sm:inline-block sm:align-middle sm:h-screen">
+                    &#8203;
+                  </span>
+                  <div
+                    className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden p-10 shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="modal-headline"
+                  >
+                    <div className="modal-content">
+                      <div className="modal-header flex justify-between items-center border-b pb-4 ">
+                        <h3 className="modal-title text-3xl font-bold">
+                          Изтрий Quiz
+                        </h3>
+                        <button
+                          className="btn btn-clear"
+                          onClick={handleCloseDeleteModal}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="modal-body mt-4">
+                        <p className="text-xl">
+                          Сигурна ли сте, че искате да изтриете Quiz-a?
+                        </p>
+                      </div>
+                      <div className="modal-footer mt-4 flex justify-end">
+                        <Button
+                          className="m-auto w-full"
+                          onClick={() => handleDeleteQuiz(quiz.id)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
