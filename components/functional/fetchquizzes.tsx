@@ -6,6 +6,9 @@ import {
   doc,
   updateDoc,
   onSnapshot,
+  getDocs,
+  DocumentReference,
+  DocumentData,
 } from "firebase/firestore";
 import { Quiz } from "@/interfaces";
 import { Button } from "../ui/button";
@@ -17,10 +20,14 @@ interface FetchQuizzesProps {
 const FetchQuizzes: React.FC<FetchQuizzesProps> = ({ onEditQuiz }) => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [quizToDeleteId, setQuizToDeleteId] = useState<string | null>(null);
 
   // Function to handle opening the delete modal
-  const handleOpenDeleteModal = () => {
+  const handleOpenDeleteModal = (quizId: string) => {
     setIsDeleteModalOpen(true);
+
+    // Store the quiz ID in state for reference when confirming deletion
+    setQuizToDeleteId(quizId);
   };
 
   // Function to handle closing the delete modal
@@ -49,14 +56,32 @@ const FetchQuizzes: React.FC<FetchQuizzesProps> = ({ onEditQuiz }) => {
     return () => unsubscribe();
   }, []);
 
-  const handleDeleteQuiz = async (quizId: string) => {
+  const handleDeleteQuiz = async () => {
     try {
-      const quizDocRef = doc(db, "quizzes", quizId);
-      await deleteDoc(quizDocRef);
-      // Refresh the quiz list after deletion
-      const updatedQuizzes = quizzes.filter((quiz) => quiz.id !== quizId);
-      setQuizzes(updatedQuizzes);
-      setIsDeleteModalOpen(false);
+      if (quizToDeleteId) {
+        // Get a reference to the quiz document
+        const quizDocRef = doc(db, "quizzes", quizToDeleteId);
+
+        // Get a reference to the nested collection 'questions'
+        const questionsCollectionRef = collection(quizDocRef, "questions");
+
+        // Delete all documents inside the nested 'questions' collection
+        const questionsQuerySnapshot = await getDocs(questionsCollectionRef);
+        questionsQuerySnapshot.forEach(async (doc) => {
+          await deleteDoc(doc.ref);
+        });
+
+        // Delete the quiz document
+        await deleteDoc(quizDocRef);
+
+        // Refresh the quiz list after deletion
+        const updatedQuizzes = quizzes.filter(
+          (quiz) => quiz.id !== quizToDeleteId
+        );
+        setQuizzes(updatedQuizzes);
+        setIsDeleteModalOpen(false);
+        setQuizToDeleteId(null); // Reset the stored quiz ID
+      }
     } catch (error) {
       console.error("Error deleting quiz:", error);
     }
@@ -93,6 +118,7 @@ const FetchQuizzes: React.FC<FetchQuizzesProps> = ({ onEditQuiz }) => {
             <p className="text-center font-semibold text-2xl mb-2">
               Код: {quiz.quizCode}
             </p>
+            <p>{quiz.id}</p>
             <p className="text-center font-semibold mb-8">
               {quiz.quizStarted ? "Активен" : "Неактивен"}
             </p>
@@ -115,7 +141,10 @@ const FetchQuizzes: React.FC<FetchQuizzesProps> = ({ onEditQuiz }) => {
               Редактирай
             </Button>
 
-            <Button className="bg-red-500" onClick={handleOpenDeleteModal}>
+            <Button
+              className="bg-red-500"
+              onClick={() => handleOpenDeleteModal(quiz.id)}
+            >
               Изтрий
             </Button>
 
@@ -171,7 +200,7 @@ const FetchQuizzes: React.FC<FetchQuizzesProps> = ({ onEditQuiz }) => {
                       <div className="modal-footer mt-4 flex justify-end">
                         <Button
                           className="m-auto w-full"
-                          onClick={() => handleDeleteQuiz(quiz.id)}
+                          onClick={handleDeleteQuiz}
                         >
                           Delete
                         </Button>
