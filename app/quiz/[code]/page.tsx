@@ -456,22 +456,47 @@ export default function Page({ params }: { params: { code: string } }) {
                 )
               : 0)
           : score;
-
-      setScore(newScore);
-      updateParticipantScore(participantName, newScore, true);
-      const allParticipantsAnswered = participants?.every(
-        (participant) => participant.hasAnswered
-      );
-
-      if (allParticipantsAnswered) {
-        // Set the current question timer to 2 seconds for all participants
-        setTime(2);
-
-        // Reset hasAnswered to false for all participants
-        resetParticipantsAnswerStatus();
-      }
+      const roundedScore = Math.round(newScore);
+      setScore(roundedScore);
+      updateParticipantScore(participantName, roundedScore, true);
     }
   };
+
+  useEffect(() => {
+    const fetchQuizData = async () => {
+      try {
+        const quizzesRef = collection(db, "quizzes");
+        const q = query(quizzesRef, where("quizCode", "==", Number(quizCode)));
+        const quizSnapshot = await getDocs(q);
+
+        if (!quizSnapshot.empty) {
+          const quizRef = doc(db, "quizzes", quizSnapshot.docs[0].id);
+          const unsubscribe = onSnapshot(quizRef, (docSnapshot) => {
+            const data = docSnapshot.data();
+            const participantsObj: Record<string, Participant> =
+              data?.participants;
+
+            const allParticipantsAnswered = Object.values(
+              participantsObj
+            ).every((participant) => participant.hasAnswered);
+
+            if (allParticipantsAnswered) {
+              // Set the current question timer to 2 seconds for all participants
+              setTime(2);
+
+              // Reset hasAnswered to false for all participants
+              resetParticipantsAnswerStatus();
+            }
+          });
+          return () => unsubscribe();
+        }
+      } catch (error) {
+        console.error("Error fetching quiz data:", error);
+      }
+    };
+
+    fetchQuizData(); // Invoke the async function
+  }, [quizCode]);
 
   const updateParticipantAnswerStatus = async (
     participantName: string,
@@ -491,20 +516,50 @@ export default function Page({ params }: { params: { code: string } }) {
   };
 
   const resetParticipantsAnswerStatus = async () => {
-    // Reset hasAnswered to false for all participants
-    const resetParticipants = participants?.map((participant) => ({
-      ...participant,
-      hasAnswered: false,
-    }));
+    try {
+      // Fetch participants from Firestore
+      const quizzesRef = collection(db, "quizzes");
+      const q = query(quizzesRef, where("quizCode", "==", Number(quizCode)));
+      const querySnapshot = await getDocs(q);
 
-    setParticipants(resetParticipants);
+      if (!querySnapshot.empty) {
+        const quizRef = doc(db, "quizzes", querySnapshot.docs[0].id);
+        const docSnapshot = await getDoc(quizRef);
+        const data = docSnapshot.data();
+        const participantsFromFirestore: Record<string, Participant> =
+          data?.participants;
 
-    // Update the Firebase Firestore document with the new participants data
-    await updateParticipantsInFirestore(resetParticipants);
+        // Reset hasAnswered to false for all participants
+        const resetParticipants = Object.values(participantsFromFirestore).map(
+          (participant) => ({
+            ...participant,
+            hasAnswered: false,
+          })
+        );
+        resetParticipants.forEach((part) => {
+          console.log([part.name + " " + part.points + " " + part.hasAnswered]);
+        });
+
+        setParticipants(resetParticipants);
+
+        // Update the Firebase Firestore document with the new participants data
+        const participantsToUpdate = resetParticipants?.map((participant) => ({
+          name: participant.name!,
+          hasAnswered: participant.hasAnswered!,
+          points: participant.points, // Add other properties as needed
+        }));
+
+        await updateDoc(quizRef, {
+          participants: participantsArrayToObject(participantsToUpdate),
+        });
+      }
+    } catch (error) {
+      console.error("Error resetting participants:", error);
+    }
   };
 
   const updateParticipantsInFirestore = async (
-    updatedParticipants?: Participant[]
+    updatedParticipants?: Array<Partial<Participant>> | undefined
   ) => {
     try {
       const quizzesRef = collection(db, "quizzes");
@@ -513,8 +568,23 @@ export default function Page({ params }: { params: { code: string } }) {
 
       if (!querySnapshot.empty) {
         const quizRef = doc(db, "quizzes", querySnapshot.docs[0].id);
+
+        updatedParticipants?.forEach((part) => {
+          console.log([
+            part.name + ", " + part.points + ", " + part.hasAnswered,
+          ]);
+        });
+
+        const participantsToUpdate = updatedParticipants?.map(
+          (participant) => ({
+            name: participant.name!,
+            hasAnswered: participant.hasAnswered!,
+            points: participant.points ?? 0, // Add other properties as needed
+          })
+        );
+
         await updateDoc(quizRef, {
-          participants: participantsArrayToObject(updatedParticipants),
+          participants: participantsArrayToObject(participantsToUpdate),
         });
       }
     } catch (error) {
@@ -607,44 +677,47 @@ export default function Page({ params }: { params: { code: string } }) {
     }
   };
 
-  async function updateParticipantScore(
+  const updateParticipantScore = async (
     participantName: string,
     newScore: number,
     hasAnswered: boolean = true
-  ) {
+  ) => {
     try {
       const quizzesRef = collection(db, "quizzes");
-      const quizQuery = query(
-        quizzesRef,
-        where("quizCode", "==", Number(quizCode))
-      );
-      const quizSnapshot = await getDocs(quizQuery);
+      const q = query(quizzesRef, where("quizCode", "==", Number(quizCode)));
+      const querySnapshot = await getDocs(q);
 
-      if (quizSnapshot.empty) {
-        console.error("Quiz not found.");
-        return;
-      }
+      if (!querySnapshot.empty) {
+        const quizRef = doc(db, "quizzes", querySnapshot.docs[0].id);
+        const participantToUpdate = participants?.find(
+          (participant) => participant.name === participantName
+        );
 
-      const quizDoc = quizSnapshot.docs[0];
-      const quizDocRef = doc(db, "quizzes", quizDoc.id);
+        if (participantToUpdate) {
+          participantToUpdate.points = newScore;
+          participantToUpdate.hasAnswered = hasAnswered;
 
-      const participantMap = quizDoc.data()?.participants || {};
+          await updateDoc(quizRef, {
+            participants: participantsArrayToObject(participants),
+          });
 
-      const participantToUpdate = Object.values<Participant>(
-        participantMap
-      ).find((participant) => participant.name === participantName);
+          const allParticipantsAnswered = participants?.every(
+            (participant) => participant.hasAnswered
+          );
 
-      if (participantToUpdate) {
-        participantToUpdate.points = newScore;
-        participantToUpdate.hasAnswered = hasAnswered;
-        await updateDoc(quizDocRef, {
-          participants: participantMap,
-        });
+          if (allParticipantsAnswered) {
+            // Set the current question timer to 2 seconds for all participants
+            setTime(2);
+
+            // Reset hasAnswered to false for all participants
+            resetParticipantsAnswerStatus();
+          }
+        }
       }
     } catch (error) {
       console.error("Error updating participant score:", error);
     }
-  }
+  };
 
   const handleResetQuiz = async () => {
     try {
